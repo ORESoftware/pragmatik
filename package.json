@@ -1,0 +1,20 @@
+{
+  "name": "pragmatik",
+  "version": "0.0.1",
+  "description": "Parse arguments correctly for variadic functions",
+  "main": "index.js",
+  "scripts": {
+    "test": "suman"
+  },
+  "keywords": [
+    "arguments",
+    "variadic",
+    "varargs",
+    "nodejs"
+  ],
+  "author": "Olegzandr Denman",
+  "license": "ISC",
+  "dependencies": {
+    "function-arguments": "^1.0.7"
+  }
+}
