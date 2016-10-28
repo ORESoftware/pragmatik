@@ -16,5 +16,8 @@
   "license": "ISC",
   "dependencies": {
     "function-arguments": "^1.0.7"
+  },
+  "devDependencies": {
+    "suman": "^1.1.512125"
   }
 }

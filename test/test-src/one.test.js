@@ -3,10 +3,11 @@
  */
 
 
-const pramatik = require('..');
+const pragmatik = require('../..');
 
 
-const r = pramatik.validate({
+const r = pragmatik.validate({
+    mode: 'strict', // does not allow two adjacent non-required types to be the same
     allowMoreArgs: false,
     parseToObject: true,
     allowExtraneousTrailingVars: false,
@@ -14,29 +15,23 @@ const r = pramatik.validate({
         {
             type: 'string',
             required: false,
-            allowNull: true,
-            allowUndefined: true,
-            checks: [function(arg){
-                 return true;
+            checks: [function (arg) {  //check to see if the object has a certain constructor or what not
+                return true;
             }]
         },
-
         {
             type: 'object',
-            required: false,
-            allowNull: true,
-            allowUndefined: true,
-            default: {}
+            required: true,
         },
 
         {
             type: 'function',
+            required: false
+        },
+        {
+            type: 'object',
             required: false,
-            allowNull: true,
-            allowUndefined: true,
-            default: function noop() {
-            }
-        }
+        },
 
     ]
 });
@@ -44,13 +39,17 @@ const r = pramatik.validate({
 
 function foo(a, b, c) {
 
-    const obj = pramatik.parse(arguments, r);
-    console.log('obj =>', obj);
+    var {a, b, c} = pragmatik.parse(arguments, r);
+
+
+    console.log('a =>', a);
+    console.log('b =>', b);
+    console.log('c =>', c);
 
 }
 
 
-foo(function(err){
+foo({a:'b'},function (err) {
 
 });
 

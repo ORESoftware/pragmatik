@@ -9,8 +9,74 @@ const util = require('util');
 const fnargs = require('function-arguments');
 
 
-function validate(obj) {
-    return obj;
+function validate(r) {
+
+    assert(Array.isArray(r.args), ' => "Pragmatik" usage error => Please define a rules array property in your rules object.');
+    const errors = [];
+    const args = r.args;
+    args.forEach(function (item, index, arr) {
+
+        //check to see if two adjacent items of the same type are both required
+        if (index > 0) {
+            const prior = arr[index - 1];
+            const priorRequired = prior.required;
+            if (!priorRequired && !item.required) {
+                if (prior.type === item.type) {
+                    errors.push('Two adjacent fields that are not both required have the same type => '
+                        + '\n => arg index => ' + (index - 1) + ' => ' + util.inspect(prior)
+                        + '\n => arg index => ' + index + ' => ' + util.inspect(item));
+                }
+            }
+        }
+
+        //check to see that if something like "string object string", to make sure object is required
+        // if both strings are not required
+        //or more generally check to see that if something like "string object function string",
+        // to make sure both object and function are required
+
+        if (index > 1) {
+
+            if (!item.required) {
+
+                var matched = false;
+                var matchedIndex = null;
+                var currentIndex = index - 2;
+                while (currentIndex >= 0) {
+                    const rule = args[currentIndex];
+                    if (rule.type === item.type && !rule.required) {
+                        matched = true;
+                        matchedIndex = currentIndex;
+                        break;
+                    }
+                    currentIndex--;
+                }
+
+                if (matched) {
+                    while (currentIndex < index - 1) {
+                        const rule = args[currentIndex];
+                        if (!rule.required) {
+                            errors.push('Two non-adjacent non-required arguments of the same type are' +
+                                ' not separated by required arguments => '
+                                + '\n => arg index => ' + matchedIndex + ' => ' + util.inspect(args[matchedIndex])
+                                + '\n => arg index => ' + index + ' => ' + util.inspect(item));
+                            break;
+                        }
+                        currentIndex++;
+                    }
+
+                }
+            }
+
+        }
+
+
+    });
+
+    if (errors.length) {
+        throw new Error(errors.map(e => (e.stack || e)).join('\n\n'));
+    }
+
+    return r;
 }
 
 function getUniqueArrayOfStrings(a) {
@@ -20,18 +86,17 @@ function getUniqueArrayOfStrings(a) {
 }
 
 
-function parse(argz, r) {
+function parse(argz, r, $parseToObject) {
 
     const callee = argz.callee;
-    assert(typeof callee === 'function', 'To use "pragmatik", please pass the arguments object.');
+    assert(typeof callee === 'function', 'To use "pragmatik", please pass the arguments object to pragmatik.parse()');
 
     const args = Array.prototype.slice.call(argz); //should work if args is arguments type or already an array
 
     console.log('original args:', args);  /// logging
 
     const rules = r.args;
-
-    const parseToObject = !!r.parseToObject;
+    const parseToObject = $parseToObject === true || !!r.parseToObject;
 
     var argNames, ret;
 
@@ -79,7 +144,8 @@ function parse(argz, r) {
         while (retArgs.length < rules.length) {
 
             const argType = typeof args[z];
-            const rulesType = rules[z].type;
+            const rulesTemp = rules[z];
+            const rulesType = rulesTemp.type;
 
             if (rulesType === argType) {
                 if (parseToObject) {
