@@ -1,0 +1,57 @@
+0 info it worked if it ends with ok
+1 verbose cli [ '/Users/t_millal/.nvm/versions/node/v6.7.0/bin/node',
+1 verbose cli   '/Users/t_millal/.nvm/versions/node/v6.7.0/bin/npm',
+1 verbose cli   'view',
+1 verbose cli   'suman',
+1 verbose cli   'version' ]
+2 info using npm@3.10.8
+3 info using node@v6.7.0
+4 silly mapToRegistry name suman
+5 silly mapToRegistry using default registry
+6 silly mapToRegistry registry https://registry.npmjs.org/
+7 silly mapToRegistry data Result {
+7 silly mapToRegistry   raw: 'suman',
+7 silly mapToRegistry   scope: null,
+7 silly mapToRegistry   escapedName: 'suman',
+7 silly mapToRegistry   name: 'suman',
+7 silly mapToRegistry   rawSpec: '',
+7 silly mapToRegistry   spec: 'latest',
+7 silly mapToRegistry   type: 'tag' }
+8 silly mapToRegistry uri https://registry.npmjs.org/suman
+9 verbose request uri https://registry.npmjs.org/suman
+10 verbose request no auth needed
+11 info attempt registry request try #1 at 8:07:09 PM
+12 verbose request using bearer token for auth
+13 verbose request id e51e7e281e5aa838
+14 verbose etag "441I8MG2B9Y8YLN2DACFJOYVR"
+15 http request GET https://registry.npmjs.org/suman
+16 info retry will retry, error on last attempt: Error: getaddrinfo ENOTFOUND registry.npmjs.org registry.npmjs.org:443
+17 info attempt registry request try #2 at 8:07:19 PM
+18 verbose request using bearer token for auth
+19 verbose etag "441I8MG2B9Y8YLN2DACFJOYVR"
+20 http request GET https://registry.npmjs.org/suman
+21 info retry will retry, error on last attempt: Error: getaddrinfo ENOTFOUND registry.npmjs.org registry.npmjs.org:443
+22 info attempt registry request try #3 at 8:08:19 PM
+23 verbose request using bearer token for auth
+24 verbose etag "441I8MG2B9Y8YLN2DACFJOYVR"
+25 http request GET https://registry.npmjs.org/suman
+26 silly get cb [ 304, undefined ]
+27 verbose etag https://registry.npmjs.org/suman from cache
+28 verbose get saving suman to /Users/t_millal/.npm/registry.npmjs.org/suman/.cache.json
+29 verbose correctMkdir /Users/t_millal/.npm correctMkdir not in flight; initializing
+30 verbose exit [ 0, true ]
+31 verbose stack Error: write EPIPE
+31 verbose stack     at exports._errnoException (util.js:1036:11)
+31 verbose stack     at WriteWrap.afterWrite (net.js:794:14)
+32 verbose cwd /Users/t_millal/WebstormProjects/oresoftware/pragmatik
+33 error Darwin 15.6.0
+34 error argv "/Users/t_millal/.nvm/versions/node/v6.7.0/bin/node" "/Users/t_millal/.nvm/versions/node/v6.7.0/bin/npm" "view" "suman" "version"
+35 error node v6.7.0
+36 error npm  v3.10.8
+37 error code EPIPE
+38 error errno EPIPE
+39 error syscall write
+40 error write EPIPE
+41 error If you need help, you may report this error at:
+41 error     <https://github.com/npm/npm/issues>
+42 verbose exit [ 1, true ]
