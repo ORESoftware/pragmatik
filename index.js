@@ -6,23 +6,41 @@
 const assert = require('assert');
 const util = require('util');
 
+//npm
 const fnargs = require('function-arguments');
 
+//project
+const types = [
+    'object',
+    'array',
+    'integer',
+    'number',
+    'string',
+    'boolean',
+    'null',
+    'undefined',
+    'function'
+];
 
 function validate(r) {
 
-    assert(Array.isArray(r.args), ' => "Pragmatik" usage error => Please define a rules array property in your rules object.');
+    assert(Array.isArray(r.args), ' => "Pragmatik" usage error => Please define an "args" array property in your definition object.');
     const errors = [];
     const args = r.args;
+
     args.forEach(function (item, index, arr) {
+
+        assert(types.indexOf(item.type) >= 0, 'Your item type is wrong or undefined, for rule => \n\n' + util.inspect(item)
+            + '\n\nin the following definition => \n' + util.inspect(r) + '\n\n');
 
         //check to see if two adjacent items of the same type are both required
         if (index > 0) {
             const prior = arr[index - 1];
             const priorRequired = prior.required;
-            if (!priorRequired && !item.required) {
+            if (!priorRequired) {
                 if (prior.type === item.type) {
-                    errors.push('Two adjacent fields that are not both required have the same type => '
+                    errors.push('Two adjacent fields are of the same type, and the preceding argument' +
+                        '(leftmost) is not required which is problematic => '
                         + '\n => arg index => ' + (index - 1) + ' => ' + util.inspect(prior)
                         + '\n => arg index => ' + index + ' => ' + util.inspect(item));
                 }
@@ -52,18 +70,23 @@ function validate(r) {
                 }
 
                 if (matched) {
-                    while (currentIndex < index - 1) {
+                    currentIndex++;  //simply bump it up by 1, once
+                    var ok = false;
+                    while (currentIndex < index) {
                         const rule = args[currentIndex];
-                        if (!rule.required) {
-                            errors.push('Two non-adjacent non-required arguments of the same type are' +
-                                ' not separated by required arguments => '
-                                + '\n => arg index => ' + matchedIndex + ' => ' + util.inspect(args[matchedIndex])
-                                + '\n => arg index => ' + index + ' => ' + util.inspect(item));
+                        if (rule.required) {
+                            ok = true; // at least one required "other-type" is in-between the two same types
                             break;
                         }
                         currentIndex++;
                     }
 
+                    if (!ok) {
+                        errors.push('Two non-adjacent non-required arguments of the same type are' +
+                            ' not separated by required arguments => '
+                            + '\n => arg index => ' + matchedIndex + ' => ' + util.inspect(args[matchedIndex])
+                            + '\n => arg index => ' + index + ' => ' + util.inspect(item));
+                    }
                 }
             }
 
@@ -93,10 +116,12 @@ function parse(argz, r, $parseToObject) {
 
     const args = Array.prototype.slice.call(argz); //should work if args is arguments type or already an array
 
-    console.log('original args:', args);  /// logging
+    console.log('\n\n', 'original args:\n', args, '\n\n');  /// logging
 
     const rules = r.args;
     const parseToObject = $parseToObject === true || !!r.parseToObject;
+
+    console.log('parseToObject =>', parseToObject);
 
     var argNames, ret;
 
@@ -117,7 +142,10 @@ function parse(argz, r, $parseToObject) {
     if (args.length === rules.length) {
 
         for (let i = 0; i < args.length; i++) {
-            assert(typeof args[i] === rules[i].type);
+            assert(typeof args[i] === rules[i].type,
+                'Type of argument does not match rule at argument index = ' + i +
+                '\n\n => actual => "' + typeof args[i] + '" => '+ util.inspect(args[i]) +
+                '\n\n => expected => ' + util.inspect(rules[i]));
         }
 
         if (parseToObject) {
@@ -139,35 +167,36 @@ function parse(argz, r, $parseToObject) {
         }
 
         const retArgs = [];
-        var z = 0;
+        // using "a" as var name makes debugging easier because it appears at the top of debugging console
+        var a = 0;
 
         while (retArgs.length < rules.length) {
 
-            const argType = typeof args[z];
-            const rulesTemp = rules[z];
+            const argType = typeof args[a];
+            const rulesTemp = rules[a];
             const rulesType = rulesTemp.type;
 
             if (rulesType === argType) {
                 if (parseToObject) {
                     retArgs.push({
-                        name: argNames[z],
-                        value: args[z]
+                        name: argNames[a],
+                        value: args[a]
                     });
                 }
                 else {
-                    retArgs.push(retArgs);
+                    retArgs.push(args[a]);
                 }
 
             }
-            else if (z > retArgs.length) {
+            else if (a > retArgs.length) {
 
                 if (r.allowExtraneousTrailingVars === false) {
-                    throw new Error('Extraneous variable passed for => ' + argNames[z]);
+                    throw new Error('Extraneous variable passed for => ' + argNames[a]);
                 }
 
                 if (parseToObject) {
                     retArgs.push({
-                        name: argNames[z],
+                        name: argNames[a],
                         value: undefined
                     });
                 }
@@ -176,31 +205,33 @@ function parse(argz, r, $parseToObject) {
                 }
 
             }
-            else if (!rules[z].required) {
+            else if (!rules[a].required) {
 
                 let rulesLengthMinusOne = rules.length - 1;
 
-                if (r.allowExtraneousTrailingVars === false && (z > rulesLengthMinusOne) && args[z]) {
-                    throw new Error('Extraneous variable passed for => "' + argNames[z] + '" => ' + util.inspect(args[z]));
+                if (r.allowExtraneousTrailingVars === false && (a > rulesLengthMinusOne) && args[a]) {
+                    throw new Error('Extraneous variable passed for => "' + argNames[a] + '" => ' + util.inspect(args[a]));
                 }
 
-                args.splice(z, 0, undefined);
+
+                args.splice(a, 0, undefined);
+
 
                 if (parseToObject) {
                     retArgs.push({
-                        name: argNames[z],
-                        value: undefined
+                        name: argNames[a],
+                        value: args[a]
                     });
                 }
                 else {
-                    retArgs.push(undefined);
+                    retArgs.push(args[a]);
                 }
             }
             else {
-                throw new Error('Argument is required at argument index = ' + z + ', but type was wrong \n => expected => "' + rulesType + '"\n => actual => "' + argType + '"');
+                throw new Error('Argument is required at argument index = ' + a + ', but type was wrong \n => expected => "' + rulesType + '"\n => actual => "' + argType + '"');
             }
 
-            z++;
+            a++;
         }
 
 

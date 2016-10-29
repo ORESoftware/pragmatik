@@ -2,13 +2,13 @@ const suman = require('suman');
 const Test = suman.init(module);
 
 
-Test.describe('basic tests', {}, function (pragmatik, assert) {
+Test.describe('basic tests', {}, function (pragmatik, assert, util) {
 
     const r = pragmatik.validate({
 
         mode: 'strict', // does not allow two adjacent non-required types to be the same
         allowMoreArgs: false,
-        parseToObject: true,
+        parseToObject: false,
         allowExtraneousTrailingVars: false,
         args: [
             {
@@ -47,14 +47,15 @@ Test.describe('basic tests', {}, function (pragmatik, assert) {
     });
 
 
-    function foo(a, b, c, d, e, f, g) {
+    function foo() {
         return pragmatik.parse(arguments, r);
     }
 
 
     this.it('basic #1', t => {
 
-        const {a, b, c, d, e, f, g, h} = foo({a: 'b'}, 'yolo', 'mogo', {z: 'e'}, {m: 'k'});
+        const [a,b,c,d,e,f,g,h] = foo({a: 'b'}, 'yolo', 'mogo', {z: 'e'}, {m: 'k'});
+
 
         assert.equal(a, undefined);
         // assert.equal(JSON.parse(JSON.stringify(b)), JSON.parse(JSON.stringify({a: 'b'})));
@@ -67,20 +68,6 @@ Test.describe('basic tests', {}, function (pragmatik, assert) {
 
 
     });
-
-
-// foo('first', function(err){
-//
-//     console.log('a is done');
-//
-// });
-
-//
-// foo('first', {}, function(err){
-//
-//     console.log('a is done');
-//
-// });
 
 
 });
