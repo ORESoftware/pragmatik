@@ -14,6 +14,11 @@ Test.describe('basic tests', {}, function (pragmatik, assert) {
             {
                 type: 'string',
                 required: false,
+                checks: [
+                    function(val){
+                        return String(val).match(/.*/);
+                    }
+                ]
             },
             {
                 type: 'object',

@@ -2,23 +2,21 @@ const suman = require('suman');
 const Test = suman.init(module);
 
 
-Test.describe('basic tests', {}, function (pragmatik, assert, util) {
+Test.describe('basic tests', {}, function (pragmatik, assert) {
 
     const r = pragmatik.validate({
 
         mode: 'strict', // does not allow two adjacent non-required types to be the same
         allowMoreArgs: false,
-        parseToObject: false,
+        parseToObject: true,
         allowExtraneousTrailingVars: false,
         args: [
             {
                 type: 'string',
                 required: false,
-                checks: [
-                    function (val) {  //check to see if the object has a certain constructor or what not
-                        return true;
-                    }
-                ]
+                checks: [function (arg) {  //check to see if the object has a certain constructor or what not
+                    return true;
+                }]
             },
             {
                 type: 'object',
@@ -38,38 +36,25 @@ Test.describe('basic tests', {}, function (pragmatik, assert, util) {
             },
             {
                 type: 'object',
-                required: true,
-                checks: [
-                    function(val){
-                        assert('z' in val, 'fff property not present.');
-                    }
-                ]
+                required: true
             },
             {
                 type: 'object',
                 required: true,
-                checks: [
-                    function(val){
-                        assert('m' in val, 'x property not present.');
-                    },
-                    function(val){
-                        assert('e' in val, 'x property not present.');
-                    },
-                ]
             },
 
         ]
     });
 
 
-    function foo() {
+    function foo(a = 'tree', b, c, d, e, f, g) {
         return pragmatik.parse(arguments, r);
     }
 
 
     this.it('basic #1', t => {
 
-        const [a,b,c,d,e,f,g,h] = foo({a: 'b'}, 'yolo', 'mogo', {z: 'e'}, {m: 'k'});
+        const {a, b, c, d, e, f, g, h} = foo({a: 'b'}, 'yolo', 'mogo', {z: 'e'}, {m: 'k'});
 
         assert.equal(a, undefined);
         assert.deepEqual(JSON.parse(JSON.stringify(b)), JSON.parse(JSON.stringify({a: 'b'})));

@@ -109,10 +109,34 @@ function getUniqueArrayOfStrings(a) {
 }
 
 
+function runChecks(arg, rule) {
+
+    const errors = [];
+
+    if (Array.isArray(rule.checks)) {
+        rule.checks.forEach(function (fn) {
+            try {
+                fn.apply(null, [arg]);
+            }
+            catch (err) {
+                errors.push(err);
+            }
+        });
+    }
+    else if (rule.checks) {
+        throw new Error('"checks" property should be an array.');
+    }
+
+    if(errors.length){
+        throw new Error(errors.map(e => (e.stack || String(e))).join('\n\n\n'));
+    }
+
+}
+
+
 function parse(argz, r, $parseToObject) {
 
-    const callee = argz.callee;
-    assert(typeof callee === 'function', 'To use "pragmatik", please pass the arguments object to pragmatik.parse()');
+
 
     const args = Array.prototype.slice.call(argz); //should work if args is arguments type or already an array
 
@@ -126,6 +150,9 @@ function parse(argz, r, $parseToObject) {
     var argNames, ret;
 
     if (parseToObject) {
+        const callee = argz.callee;
+        assert(typeof callee === 'function', 'To use "pragmatik" with "parseToObject" option set to true,' +
+            ' please pass the arguments object to pragmatik.parse(), [this may not work in strict mode].');
         argNames = fnargs(callee);
         assert(getUniqueArrayOfStrings(argNames), ' => "Pragmatik" usage error => You have duplicate argument names, ' +
             'or otherwise you need to name all your arguments so they match your rules, and are same length.');
@@ -142,10 +169,14 @@ function parse(argz, r, $parseToObject) {
     if (args.length === rules.length) {
 
         for (let i = 0; i < args.length; i++) {
+
             assert(typeof args[i] === rules[i].type,
                 'Type of argument does not match rule at argument index = ' + i +
-                '\n\n => actual => "' + typeof args[i] + '" => '+ util.inspect(args[i]) +
+                '\n\n => actual => "' + typeof args[i] + '" => ' + util.inspect(args[i]) +
                 '\n\n => expected => ' + util.inspect(rules[i]));
+
+            //if the type matches, then let's run the validation checks
+            runChecks(args[i], rules[i]);
         }
 
         if (parseToObject) {
@@ -177,6 +208,10 @@ function parse(argz, r, $parseToObject) {
             const rulesType = rulesTemp.type;
 
             if (rulesType === argType) {
+
+                //if the type matches, then let's run the validation checks
+                runChecks(args[a], rules[a]);
+
                 if (parseToObject) {
                     retArgs.push({
                         name: argNames[a],
