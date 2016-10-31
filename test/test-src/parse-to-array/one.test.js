@@ -4,7 +4,7 @@ const Test = suman.init(module);
 
 Test.describe('basic tests', {}, function (pragmatik, assert, util) {
 
-    const r = pragmatik.validate({
+    const r = pragmatik.signature({
 
         mode: 'strict', // does not allow two adjacent non-required types to be the same
         allowMoreArgs: false,
@@ -50,10 +50,7 @@ Test.describe('basic tests', {}, function (pragmatik, assert, util) {
                 required: true,
                 checks: [
                     function(val){
-                        assert('m' in val, 'x property not present.');
-                    },
-                    function(val){
-                        assert('e' in val, 'x property not present.');
+                        assert('m' in val, 'property not present.');
                     },
                 ]
             },
@@ -69,7 +66,7 @@ Test.describe('basic tests', {}, function (pragmatik, assert, util) {
 
     this.it('basic #1', t => {
 
-        const [a,b,c,d,e,f,g,h] = foo({a: 'b'}, 'yolo', 'mogo', {z: 'e'}, {m: 'k'});
+        const [a,b,c,d,e,f,g,h,i] = foo({a: 'b'}, 'yolo', 'mogo', {z: 'e'}, {m: 'k'});
 
         assert.equal(a, undefined);
         assert.deepEqual(JSON.parse(JSON.stringify(b)), JSON.parse(JSON.stringify({a: 'b'})));
@@ -79,7 +76,7 @@ Test.describe('basic tests', {}, function (pragmatik, assert, util) {
         assert.deepEqual(f, {z: 'e'});
         assert.deepEqual(g, {m: 'k'});
         assert.equal(h, undefined);
-
+        assert.equal(i, undefined);
 
     });
 

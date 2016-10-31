@@ -4,7 +4,7 @@ const Test = suman.init(module);
 
 Test.describe('basic tests', {}, function (pragmatik, assert) {
 
-    const r = pragmatik.validate({
+    const r = pragmatik.signature({
 
         mode: 'strict', // does not allow two adjacent non-required types to be the same
         allowMoreArgs: false,
@@ -45,9 +45,31 @@ Test.describe('basic tests', {}, function (pragmatik, assert) {
 
     this.it('basic #2', t => {
 
-        assert.throws(function(){
-            const [a, b, c, d] = foo('oh yes');
+        assert.throws(function () {
+                const [a, b, c, d] = foo('oh yes');
+            },
+            /Argument is required at argument index = 1, but type was wrong/,
+            'did not throw with expected message');
+
+    });
+
+    this.it('basic #2', t => {
+
+        assert.throws(function () {
+                const [a, b, c, d] = foo('oh yes', function gg() {
+                });
+            },
+            /Argument is required at argument index = 1, but type was wrong/);
+
+    });
+
+
+    this.it('basic #2', t => {
+
+        const [a, b, c, d] = foo('oh yes', {u: 's'}, function a() {
+
         });
+
 
     });
 

@@ -4,18 +4,17 @@ const Test = suman.init(module);
 
 Test.describe('basic tests', {}, function (pragmatik, assert) {
 
-    const r = pragmatik.validate({
+    const r = pragmatik.signature({
 
         mode: 'strict', // does not allow two adjacent non-required types to be the same
-        allowMoreArgs: false,
-        parseToObject: true,
-        allowExtraneousTrailingVars: false,
+        parseToObject: false,
+        allowExtraneousTrailingVars: true,
         args: [
             {
                 type: 'string',
                 required: false,
                 checks: [
-                    function(val){
+                    function (val) {
                         return String(val).match(/.*/);
                     }
                 ]
@@ -37,58 +36,79 @@ Test.describe('basic tests', {}, function (pragmatik, assert) {
     }
 
 
-    this.it('basic #1', t => {
+    this.describe('bs', function () {
 
-        assert.throws(function () {
-            const {a, b, c, d} = foo('oh yes', {a: 'b'});
+        this.it('basic #1', t => {
+
+            assert.throws(function () {
+                const [a, b, c, d] = foo('oh yes', {a: 'b'});
+            }, /Argument is required at argument index.*but type was wrong/);
+
         });
 
-    });
+        this.it('basic #1', t => {
 
-    this.it('basic #1', t => {
+            assert.throws(function () {
+                const [a, b, c, d] = foo({a: 'b'});
+            }, /Argument is required at argument index.*but type was wrong/);
 
-        assert.throws(function () {
-            const {a, b, c, d} = foo({a: 'b'});
         });
 
-    });
+        this.it('basic #1', t => {
 
-    this.it('basic #1', t => {
+            const [a, b, c, d]= foo(null, function z() {
+            });
 
-        const {a, b, c, d} = foo(null, function () {
+            assert.equal(a, undefined);
+            assert.equal(b, null);
+            assert.equal(c.name, 'z');
+
+
+        });
+
+        this.it('basic #1', t => {
+
+            const [a, b, c, d] = foo('cheese', function xyz() {
+            });
+
+            assert.equal(a, 'cheese');
+            assert.equal(b, undefined);
+            assert.equal(c.name, 'xyz');
+            assert.equal(d, undefined);
+
         });
 
 
-    });
+        this.it('basic #2', t => {
 
-    this.it('basic #1', t => {
+            const [a, b, c, d] = foo('bar', function noop() {
+            });
 
-        const {a, b, c, d} = foo('cheese', function () {
+            assert.equal(a, 'bar');
+            assert.equal(b, undefined);
+            assert.equal(typeof c, 'function');
+            assert.equal(d, undefined);
+
         });
-
-
     });
+
 
     this.it('basic #2', t => {
 
         //TODO: this should prob fail if allowExtraneousTrailingVars === false
-        assert.throws(function () {
-            const {a, b, c, d} = foo(function noop() {
-            }, function noop() {
-            });
+
+        const [a, b, c, d, e, f] = foo(function noop() {
+        }, function zzz() {
+
+        }, function ppp() {
+
         });
 
-    });
-
-
-    this.it('basic #2', t => {
-
-        const {a, b, c, d} = foo('bar', function noop() {
-        });
-
-        assert.equal(a, 'bar');
+        assert.equal(a, undefined);
         assert.equal(b, undefined);
-        assert.equal(typeof c, 'function');
+        assert.equal(c.name, 'noop');
+        assert.equal(d.name, 'zzz');
+        assert.equal(e.name, 'ppp');
 
     });
 

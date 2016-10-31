@@ -22,7 +22,7 @@ const types = [
     'function'
 ];
 
-function validate(r) {
+function signature(r) {
 
     assert(Array.isArray(r.args), ' => "Pragmatik" usage error => Please define an "args" array property in your definition object.');
     const errors = [];
@@ -127,7 +127,7 @@ function runChecks(arg, rule) {
         throw new Error('"checks" property should be an array.');
     }
 
-    if(errors.length){
+    if (errors.length) {
         throw new Error(errors.map(e => (e.stack || String(e))).join('\n\n\n'));
     }
 
@@ -137,10 +137,10 @@ function runChecks(arg, rule) {
 function parse(argz, r, $parseToObject) {
 
 
+    const originalArgs = Array.prototype.slice.call(argz); //should work if args is arguments type or already an array
+    const args = originalArgs.map(a => a);  //copy original orgs
 
-    const args = Array.prototype.slice.call(argz); //should work if args is arguments type or already an array
-
-    console.log('\n\n', 'original args:\n', args, '\n\n');  /// logging
+    console.log('\n\n', 'original args:\n', originalArgs, '\n\n');  /// logging
 
     const rules = r.args;
     const parseToObject = $parseToObject === true || !!r.parseToObject;
@@ -159,126 +159,109 @@ function parse(argz, r, $parseToObject) {
         ret = {};
     }
 
-    if (args.length > rules.length && rules.allowMoreArgs !== true) {
-        throw new Error('=> Usage error from "pragmatik" library => arguments length is greater than length of rules.');
+    if (args.length > rules.length && rules.allowMoreArgs === false) {
+        throw new Error('=> Usage error from "pragmatik" library => arguments length is greater than length of rules array,' +
+            ' and "allowExtraneousTrailingVars" is explicitly set to false.');
     }
     else if (args.length > rules.length) {
         throw new Error('Not implemented yet.');
     }
 
-    if (args.length === rules.length) {
-
-        for (let i = 0; i < args.length; i++) {
-
-            assert(typeof args[i] === rules[i].type,
-                'Type of argument does not match rule at argument index = ' + i +
-                '\n\n => actual => "' + typeof args[i] + '" => ' + util.inspect(args[i]) +
-                '\n\n => expected => ' + util.inspect(rules[i]));
-
-            //if the type matches, then let's run the validation checks
-            runChecks(args[i], rules[i]);
-        }
-
-        if (parseToObject) {
-            for (let i = 0; i < args.length; i++) {
-                ret[argNames[i]] = args[i];
-            }
-            return ret;
-        }
-        else {
-            return args;
-        }
+    const requiredLength = rules.filter(item => item.required);
+    if (requiredLength > args.length) {
+        throw new Error('"Pragmatic" rules dictate that there are more required args than those passed to function.');
     }
 
-    else {
+    const retArgs = [];
+    // using "a" as var name makes debugging easier because it appears at the top of debugging console
+    var a = 0;
 
-        const requiredLength = rules.filter(item => item.required);
-        if (requiredLength > args.length) {
-            throw new Error('"Pragmatic" rules dicate that there are more required args than those passed to function.');
-        }
+    while (retArgs.length < rules.length || args[a]) {  //args[a] may be undefined
 
-        const retArgs = [];
-        // using "a" as var name makes debugging easier because it appears at the top of debugging console
-        var a = 0;
+        const argType = typeof args[a];
+        const rulesTemp = rules[a];
 
-        while (retArgs.length < rules.length) {
-
-            const argType = typeof args[a];
-            const rulesTemp = rules[a];
-            const rulesType = rulesTemp.type;
-
-            if (rulesType === argType) {
-
-                //if the type matches, then let's run the validation checks
-                runChecks(args[a], rules[a]);
-
-                if (parseToObject) {
-                    retArgs.push({
-                        name: argNames[a],
-                        value: args[a]
-                    });
-                }
-                else {
-                    retArgs.push(args[a]);
-                }
-
-            }
-            else if (a > retArgs.length) {
-
-                if (r.allowExtraneousTrailingVars === false) {
-                    throw new Error('Extraneous variable passed for => ' + argNames[a]);
-                }
-
-                if (parseToObject) {
-                    retArgs.push({
-                        name: argNames[a],
-                        value: undefined
-                    });
-                }
-                else {
-                    retArgs.push(undefined);
-                }
-
-            }
-            else if (!rules[a].required) {
-
-                let rulesLengthMinusOne = rules.length - 1;
-
-                if (r.allowExtraneousTrailingVars === false && (a > rulesLengthMinusOne) && args[a]) {
-                    throw new Error('Extraneous variable passed for => "' + argNames[a] + '" => ' + util.inspect(args[a]));
-                }
-
-
-                args.splice(a, 0, undefined);
-
-
-                if (parseToObject) {
-                    retArgs.push({
-                        name: argNames[a],
-                        value: args[a]
-                    });
-                }
-                else {
-                    retArgs.push(args[a]);
-                }
+        if (!rulesTemp) { // a > rulesTemp.length -1
+            if (r.allowExtraneousTrailingVars === false) {
+                throw new Error('Extraneous variable passed for index => ' + a + ' => with value ' + args[a]);
             }
             else {
-                throw new Error('Argument is required at argument index = ' + a + ', but type was wrong \n => expected => "' + rulesType + '"\n => actual => "' + argType + '"');
+                retArgs.push(args[a]);
+                a++;
+                continue;
+            }
+        }
+
+        const rulesType = rulesTemp.type;
+
+        if (rulesType === argType) {
+
+            //if the type matches, then let's run the validation checks
+            runChecks(args[a], rules[a]);
+
+            if (parseToObject) {
+                retArgs.push({
+                    name: argNames[a],
+                    value: args[a]
+                });
+            }
+            else {
+                retArgs.push(args[a]);
             }
 
-            a++;
+        }
+        else if (a > retArgs.length) {
+
+            if (r.allowExtraneousTrailingVars === false) {
+                throw new Error('Extraneous variable passed for index => ' + a + ' => with value ' + args[a]);
+            }
+
+            if (parseToObject) {
+                retArgs.push({
+                    name: argNames[a],
+                    value: undefined
+                });
+            }
+            else {
+                retArgs.push(undefined);
+            }
+
+        }
+        else if (!rules[a].required) {
+
+            // have to compare against rules.length - 1, not rules.length because we haven't pushed to the array yet
+            if (r.allowExtraneousTrailingVars === false && (retArgs.length > (rules.length - 1)) && args[a]) {
+                throw new Error('Extraneous variable passed for => "' + argNames[a] + '" => ' + util.inspect(args[a]));
+            }
+
+            args.splice(a, 0, undefined);
+
+            if (parseToObject) {
+                retArgs.push({
+                    name: argNames[a],
+                    value: undefined
+                });
+            }
+            else {
+                retArgs.push(undefined);
+            }
+        }
+        else {
+            throw new Error('Argument is required at argument index = ' + a + ', but type was wrong \n => expected => "' + rulesType + '"\n => actual => "' + argType + '"');
         }
 
-
-        if (parseToObject) {
-            retArgs.forEach(function (item) {
-                ret[item.name] = item.value;
-            });
-            return ret;
-        }
-
-        return retArgs;
+        a++;
     }
+
+
+    if (parseToObject) {
+        retArgs.forEach(function (item) {
+            ret[item.name] = item.value;
+        });
+        return ret;
+    }
+
+    return retArgs;
 
 
 }
@@ -286,5 +269,5 @@ function parse(argz, r, $parseToObject) {
 
 module.exports = {
     parse: parse,
-    validate: validate
+    signature: signature
 };

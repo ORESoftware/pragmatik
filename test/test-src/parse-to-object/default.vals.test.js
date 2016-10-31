@@ -4,7 +4,7 @@ const Test = suman.init(module);
 
 Test.describe('basic tests', {}, function (pragmatik, assert) {
 
-    const r = pragmatik.validate({
+    const r = pragmatik.signature({
 
         mode: 'strict', // does not allow two adjacent non-required types to be the same
         allowMoreArgs: false,
