@@ -13,6 +13,7 @@ Test.describe('basic tests', {}, function (pragmatik, assert) {
             {
                 type: 'string',
                 required: false,
+                errorMessage: 'test error message 1',
                 checks: [
                     function (val) {
                         return String(val).match(/.*/);
@@ -22,10 +23,12 @@ Test.describe('basic tests', {}, function (pragmatik, assert) {
             {
                 type: 'object',
                 required: false,
+                errorMessage: 'test error message 2'
             },
             {
                 type: 'function',
                 required: true,
+                errorMessage: 'test error message 3'
             }
         ]
     });
@@ -98,6 +101,25 @@ Test.describe('basic tests', {}, function (pragmatik, assert) {
         //TODO: this should prob fail if allowExtraneousTrailingVars === false
 
         const [a, b, c, d, e, f] = foo(function noop() {
+        }, function zzz() {
+
+        }, function ppp() {
+
+        });
+
+        assert.equal(a, undefined);
+        assert.equal(b, undefined);
+        assert.equal(c.name, 'noop');
+        assert.equal(d.name, 'zzz');
+        assert.equal(e.name, 'ppp');
+
+    });
+
+    this.it('basic #2', t => {
+
+        //TODO: this should prob fail if allowExtraneousTrailingVars === false
+
+        const [a, b, c, d, e, f] = foo(false,function noop() {
         }, function zzz() {
 
         }, function ppp() {

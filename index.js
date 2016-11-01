@@ -163,9 +163,6 @@ function parse(argz, r, $parseToObject) {
         throw new Error('=> Usage error from "pragmatik" library => arguments length is greater than length of rules array,' +
             ' and "allowExtraneousTrailingVars" is explicitly set to false.');
     }
-    else if (args.length > rules.length) {
-        throw new Error('Not implemented yet.');
-    }
 
     const requiredLength = rules.filter(item => item.required);
     if (requiredLength > args.length) {
@@ -247,7 +244,9 @@ function parse(argz, r, $parseToObject) {
             }
         }
         else {
-            throw new Error('Argument is required at argument index = ' + a + ', but type was wrong \n => expected => "' + rulesType + '"\n => actual => "' + argType + '"');
+            throw new Error((rulesTemp.errorMessage ? rulesTemp.errorMessage : '')
+                + '\nArgument is required at argument index = ' + a + ', but type was wrong \n => expected => "'
+                + rulesType + '"\n => actual => "' + argType + '"');
         }
 
         a++;
