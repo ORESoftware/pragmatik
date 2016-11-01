@@ -1,14 +1,15 @@
 const suman = require('suman');
-const Test = suman.init(module);
+const _Test = suman.init(module);
 
 
-Test.describe('basic tests', {}, function (pragmatik, assert) {
+_Test.describe('basic tests', {}, function (pragmatik, assert) {
 
     const r = pragmatik.signature({
 
         mode: 'strict', // does not allow two adjacent non-required types to be the same
         parseToObject: false,
         allowExtraneousTrailingVars: true,
+        extraneousVarsErrorMessage: 'Too many args. Signature is Test.describe(String s, [opts o], Function f)',
         args: [
             {
                 type: 'string',

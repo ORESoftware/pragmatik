@@ -2,7 +2,6 @@
 // => For more info, see =>  oresoftware.github.io/suman/suman-config.html
 
 
-
 const os = require('os');
 const path = require('path');
 
@@ -51,23 +50,37 @@ module.exports = Object.freeze({
     watch: {
 
         '//tests': {
-            'default': {  // (re) execute the test file that changed
-                script: function(p){
-                    return `./node_modules/.bin/suman ${p}`
-                },
-                include: [],
-                exclude: ['^test.*']
-            }
+            script: function (p) {
+                return `./node_modules/.bin/suman ${p}`
+            },
+            include: [],
+            exclude: ['^test.*']
         },
 
         '//project': {
-            'default': {  //run all tests when a file changes in project
-                script: './node_modules/.bin/suman',
-                include: [],
-                exclude: ['^test.*']
-            }
-
+            script: './node_modules/.bin/suman',
+            include: [],
+            exclude: ['^test.*']
         },
+
+        // '//tests': {
+        //     'default': {  // (re) execute the test file that changed
+        //         script: function(p){
+        //             return `./node_modules/.bin/suman ${p}`
+        //         },
+        //         include: [],
+        //         exclude: ['^test.*']
+        //     }
+        // },
+        //
+        // '//project': {
+        //     'default': {  //run all tests when a file changes in project
+        //         script: './node_modules/.bin/suman',
+        //         include: [],
+        //         exclude: ['^test.*']
+        //     }
+        //
+        // },
     },
 
     reporters: {

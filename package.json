@@ -18,6 +18,8 @@
     "function-arguments": "^1.0.7"
   },
   "devDependencies": {
-    "suman": "^1.1.512125"
+    "frontail": "^4.0.1",
+    "suman": "^1.1.512125",
+    "suman-server": "0.0.204"
   }
 }
