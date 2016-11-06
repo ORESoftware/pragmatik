@@ -1,12 +1,10 @@
-/**
- * Created by t_millal on 10/28/16.
- */
 
 //core
 const assert = require('assert');
 const util = require('util');
 
 //npm
+const debug = require('debug')('pragmatik');
 const fnargs = require('function-arguments');
 
 //project
@@ -137,15 +135,11 @@ function runChecks(arg, rule) {
 function parse(argz, r, $parseToObject) {
 
 
-    const originalArgs = Array.prototype.slice.call(argz); //should work if args is arguments type or already an array
-    const args = originalArgs.map(a => a);  //copy original orgs
-
-    console.log('\n\n', 'original args:\n', originalArgs, '\n\n');  /// logging
+    const args = Array.prototype.slice.call(argz); //should work if args is arguments type or already an array
+    debug('\n\n', 'original args => \n', args, '\n\n');
 
     const rules = r.args;
     const parseToObject = $parseToObject === true || !!r.parseToObject;
-
-    console.log('parseToObject =>', parseToObject);
 
     var argNames, ret;
 

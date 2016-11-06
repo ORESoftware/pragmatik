@@ -2,7 +2,7 @@ const suman = require('suman');
 const _Test = suman.init(module);
 
 
-_Test.describe('basic tests', {}, function (pragmatik, assert) {
+_Test.describe.skip('basic tests', {}, function (pragmatik, assert) {
 
     const r = pragmatik.signature({
 
@@ -35,9 +35,17 @@ _Test.describe('basic tests', {}, function (pragmatik, assert) {
     });
 
 
-    function foo(a, b, c, d) {
+    function foo() {
         return pragmatik.parse(arguments, r);
     }
+
+    this.describe.skip('age', function(){
+
+    });
+
+    this.describe.skip('age', function(){
+
+    });
 
 
     this.describe('bs', function () {
@@ -116,22 +124,24 @@ _Test.describe('basic tests', {}, function (pragmatik, assert) {
 
     });
 
-    this.it('basic #2', t => {
+    this.it.only('basic #2', {throws: /test error message 3/}, t => {
+
+        throw new Error('test error messa 3');
 
         //TODO: this should prob fail if allowExtraneousTrailingVars === false
 
-        const [a, b, c, d, e, f] = foo(false,function noop() {
-        }, function zzz() {
-
-        }, function ppp() {
-
-        });
-
-        assert.equal(a, undefined);
-        assert.equal(b, undefined);
-        assert.equal(c.name, 'noop');
-        assert.equal(d.name, 'zzz');
-        assert.equal(e.name, 'ppp');
+        // const [a, b, c, d, e, f] = foo(false,function noop() {
+        // }, function zzz() {
+        //
+        // }, function ppp() {
+        //
+        // });
+        //
+        // assert.equal(a, undefined);
+        // assert.equal(b, undefined);
+        // assert.equal(c.name, 'noop');
+        // assert.equal(d.name, 'zzz');
+        // assert.equal(e.name, 'ppp');
 
     });
 
