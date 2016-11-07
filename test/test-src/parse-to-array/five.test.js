@@ -2,7 +2,7 @@ const suman = require('suman');
 const _Test = suman.init(module);
 
 
-_Test.describe.skip('basic tests', {}, function (pragmatik, assert) {
+_Test.describe('basic tests', {}, function (pragmatik, assert) {
 
     const r = pragmatik.signature({
 
@@ -126,7 +126,7 @@ _Test.describe.skip('basic tests', {}, function (pragmatik, assert) {
 
     this.it.only('basic #2', {throws: /test error message 3/}, t => {
 
-        throw new Error('test error messa 3');
+        throw new Error('test error message 3');
 
         //TODO: this should prob fail if allowExtraneousTrailingVars === false
 
