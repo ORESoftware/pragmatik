@@ -107,14 +107,14 @@ function getUniqueArrayOfStrings(a) {
 }
 
 
-function runChecks(arg, rule) {
+function runChecks(arg, rule, retArgs) {
 
     const errors = [];
 
     if (Array.isArray(rule.checks)) {
         rule.checks.forEach(function (fn) {
             try {
-                fn.apply(null, [arg]);
+                fn.apply(null, [arg, rule, retArgs]);
             }
             catch (err) {
                 errors.push(err);
@@ -122,7 +122,7 @@ function runChecks(arg, rule) {
         });
     }
     else if (rule.checks) {
-        throw new Error('"checks" property should be an array.');
+        throw new Error(' => Pragmatic usage error => "checks" property should be an array => ' + util.inspect(rule));
     }
 
     if (errors.length) {
@@ -188,7 +188,7 @@ function parse(argz, r, $parseToObject) {
         if (rulesType === argType) {
 
             //if the type matches, then let's run the validation checks
-            runChecks(args[a], rules[a]);
+            runChecks(args[a], rulesTemp, retArgs);
 
             if (parseToObject) {
                 retArgs.push({
@@ -218,7 +218,7 @@ function parse(argz, r, $parseToObject) {
             }
 
         }
-        else if (!rules[a].required) {
+        else if (!rulesTemp.required) {
 
             // have to compare against rules.length - 1, not rules.length because we haven't pushed to the array yet
             if (r.allowExtraneousTrailingVars === false && (retArgs.length > (rules.length - 1)) && args[a]) {
@@ -227,14 +227,24 @@ function parse(argz, r, $parseToObject) {
 
             args.splice(a, 0, undefined);
 
+            const fn = rulesTemp.default;
+
+            var deflt;
+            if(fn && typeof fn !== 'function'){
+                throw new Error(' => Pragmatik usage error => "default" property should be undefined or a function.');
+            }
+            else if(fn){
+                deflt = fn();
+            }
+
             if (parseToObject) {
                 retArgs.push({
                     name: argNames[a],
-                    value: undefined
+                    value: deflt
                 });
             }
             else {
-                retArgs.push(undefined);
+                retArgs.push(deflt);
             }
         }
         else {

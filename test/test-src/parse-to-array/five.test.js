@@ -39,13 +39,6 @@ _Test.describe('basic tests', {}, function (pragmatik, assert) {
         return pragmatik.parse(arguments, r);
     }
 
-    this.describe.skip('age', function(){
-
-    });
-
-    this.describe.skip('age', function(){
-
-    });
 
 
     this.describe('bs', function () {
@@ -124,9 +117,9 @@ _Test.describe('basic tests', {}, function (pragmatik, assert) {
 
     });
 
-    this.it.only('basic #2', {throws: /test error message 3/}, t => {
+    this.it('basic #2', {}, t => {
 
-        throw new Error('test error message 3');
+        // throw new Error('test error message 3');
 
         //TODO: this should prob fail if allowExtraneousTrailingVars === false
 
