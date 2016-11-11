@@ -8,7 +8,7 @@ _Test.describe('basic tests', {}, function (pragmatik, assert) {
 
         mode: 'strict', // does not allow two adjacent non-required types to be the same
         parseToObject: false,
-        allowExtraneousTrailingVars: true,
+        allowExtraneousTrailingVars: false,
         extraneousVarsErrorMessage: 'Too many args. Signature is Test.describe(String s, [opts o], Function f)',
         args: [
             {
@@ -102,8 +102,7 @@ _Test.describe('basic tests', {}, function (pragmatik, assert) {
 
         //TODO: this should prob fail if allowExtraneousTrailingVars === false
 
-        const [a, b, c, d, e, f] = foo(function noop() {
-        }, function zzz() {
+        const [a, b, c, d, e, f] = foo(function zzz() {
 
         }, function ppp() {
 

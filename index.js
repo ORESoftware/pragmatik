@@ -128,6 +128,18 @@ function runChecks (arg, rule, retArgs) {
 
 }
 
+function findTypeOfNextRequiredItem (a, rules) {
+
+  for (var i = a; i < rules.length; i++) {
+    console.log(rules[i]);
+    if (rules[ i ].required === true) {
+      return rules[ i ].type;
+    }
+  }
+
+  return null;
+}
+
 function parse (argz, r, $opts) {
 
   const opts = $opts || {};
@@ -148,6 +160,8 @@ function parse (argz, r, $opts) {
   var argNames, ret;
 
   if (parseToObject) {
+    //TODO: note this also won't work in the rare case that pragmatik parse is called in a compound fashion,
+    //TODO because then it will not be an arguments object, but a simple array
     const callee = argz.callee;
     assert(typeof callee === 'function', 'To use "pragmatik" with "parseToObject" option set to true,' +
       ' please pass the arguments object to pragmatik.parse(), [this may not work in strict mode].');
@@ -240,35 +254,33 @@ function parse (argz, r, $opts) {
       // then if the first arg expected to be a string, but is not required
       // then we don't want to splice the original args, just leave it
 
-      if (argsLengthGreaterThanOrEqualToRulesLength) {
-        throw new Error((rulesTemp.errorMessage ? rulesTemp.errorMessage : '')
-          + '\nArgument is *not* required at argument index = ' + a + ', but type was wrong \n => expected => "'
-          + rulesType + '"\n => actual => "' + argType + '"');
+      // const rightType = findTypeOfNextRequiredItem(a, rules);
+
+      // if (argType !== rightType && a < rules.length) {
+      //   throw new Error(msg + '\nArgument passed at index = ' + a + ' has a type of "' + argType + '", which does not \n' +
+      //     ' match the expected type at that index of the rules which is => "' + rulesType + '" and no valid\n' +
+      //     'argument has that type to the right of the index.');
+      // }
+
+
+       if (argsLengthGreaterThanOrEqualToRulesLength) {
+
+        if (argsOfA !== undefined) {
+          const errMsg = rulesTemp.errorMessage;
+          const msg = typeof errMsg === 'function' ? errMsg(r) : (errMsg || '');
+
+          throw new Error(msg + '\nArgument is *not* required at argument index = ' + a +
+            ', but type was wrong \n => expected => "'
+            + rulesType + '"\n => actual => "' + argType + '"');
+        }
       }
       else {
         args.splice(a, 0, undefined);
       }
 
-      // var throwE;
-      //
-      // if (typeof rules[ a + 1 ] === 'object') {
-      //   throwE = true;
-      //   const rtemp = rules[ a + 1 ];
-      //   if (rtemp.type = argType) {
-      //     throwE = false;
-      //     args.splice(a, 0, undefined);
-      //   }
-      // }
-      //
-      // if (throwE) {
-      //   throw new Error((rulesTemp.errorMessage ? rulesTemp.errorMessage : '')
-      //     + '\nArgument is required at argument index = ' + a + ', but type was wrong \n => expected => "'
-      //     + rulesType + '"\n => actual => "' + argType + '"');
-      // }
-
       const fn = rulesTemp.default;
 
-      var deflt;
+      var deflt = undefined;  //this assignment is necessary to reassign for each loop
       if (fn && typeof fn !== 'function') {
         throw new Error(' => Pragmatik usage error => "default" property should be undefined or a function.');
       }
@@ -287,8 +299,12 @@ function parse (argz, r, $opts) {
       }
     }
     else {
-      throw new Error((rulesTemp.errorMessage ? rulesTemp.errorMessage : '')
-        + '\nArgument is required at argument index = ' + a + ', but type was wrong \n => expected => "'
+
+      const errMsg = rulesTemp.errorMessage;
+      const msg = typeof errMsg === 'function' ? errMsg(r) : (errMsg || '');
+
+      throw new Error(msg + '\nArgument is required at argument index = ' + a + ', ' +
+        'but type was wrong \n => expected => "'
         + rulesType + '"\n => actual => "' + argType + '"');
     }
 
