@@ -1,13 +1,8 @@
 
 # PRAGMATIK
 
-This library attempts to solve an age-old problem in JavaScript => how do we parse the arguments inside a function
-that accepts a variable number of arguments? (See "variadic functions" and "varargs"). I have seen so many people roll their 
-own solution to this problem. At best we get bad error messages or no error messages. At worst, we end up with runtimes using the 
-wrong values, until something breaks, or worse until something succeeds. Pragmatik is design to fail-fast => if your rules are not valid,
-an error is thrown and if any function cannot be parsed successfully given the runtime arguments and the parsing rules, an error is thrown.
-
-### Disclaimer => the Pragmatik library is in beta
+This library attempts to solve an age-old problem in JavaScript => how do we correctly parse the arguments inside a function
+that accepts a variable number of arguments? (See "variadic functions" and "varargs"). 
 
 This library allows you to elegantly parse arguments at runtime and assign them to the 
 correct/expected variable in the function signature, according to the parsing rules you define.
@@ -16,6 +11,17 @@ and not requiring them to pass ```null``` or other placeholder values. Of course
 with simple function calls with limited number of variation in the signature. Using options objects is a great
 design pattern to keep things simple, but at some point variadic functions become convenient and we must handle 
 them well, without writing buggy code that will fail silently in edge cases.
+
+
+
+### Disclaimer => the Pragmatik library is in beta
+
+I have seen so many people roll their own solution to this problem - I would be willing to bet at least 1000 JS libraries have public APIs that accept
+variable number of arguments and/or optional arguments. 
+At best we get bad error messages or no error messages. At worst, we end up with runtimes using the 
+wrong values, until something breaks, or worse until something succeeds. Pragmatik is designed to fail-fast => 
+(1) if your function parsing rules are not valid, an error is thrown (2) if any function cannot be parsed successfully given the runtime arguments and the parsing rules, 
+an error is thrown.
 
 Extensive testing needs to be completed before this library is totally proven. Also need some sanity checks to make sure this is exactly what people
 need and want. We will incorporate other "types" that can be easily and reliably checked, like 'array'. 
@@ -131,7 +137,9 @@ function foo(a,b,c){
 
 if we call foo like this:
 
+```js
 foo('this is b', 'this is c');
+```
 
 then of course, we will get:
 
@@ -142,7 +150,9 @@ worse in more complicated function calls.
 
 We could solve this, by requiring users to always pass 3 arguments, no more, no less, which would be:
 
+```js
 foo(null, 'this is b', 'this is c');
+```
 
 But what if we want to make our APIs as beautiful as possible and give our users the convenience of omitting
 variables?
@@ -155,7 +165,7 @@ variables?
 
 
 Pragmatik first validates your rules object, to make sure the rules you define are valid according to the way
-this library works. Parsing varargs is more difficult than you might think at first, and you have to settle 
+this library works. Parsing varargs is more difficult than you might think, and you have to settle 
 on a good strategy.
 
 Pragmatik uses types ('function','object','string') as a building block for determining if you passed in the 
