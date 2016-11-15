@@ -2,18 +2,29 @@
 # PRAGMATIK
 
 This library attempts to solve an age-old problem in JavaScript => how do we parse the arguments inside a function
-that accepts a variable number of arguments? (See "variadic functions" and "varargs"). 
+that accepts a variable number of arguments? (See "variadic functions" and "varargs"). I have seen so many people roll their 
+own solution to this problem. At best we get bad error messages or no error messages. At worst, we end up with runtimes using the 
+wrong values, until something breaks, or worse until something succeeds. Pragmatik is design to fail-fast => if your rules are not valid,
+an error is thrown and if any function cannot be parsed successfully given the runtime arguments and the parsing rules, an error is thrown.
 
-### Disclaimer, Pragmatik library is in beta
+### Disclaimer => the Pragmatik library is in beta
 
 This library allows you to elegantly parse arguments at runtime and assign them to the 
-correct variable in the function signature, according to the parsing rules you define.
-It is most useful for APIs where we want to give our users the convenience of omitting variables,
-and not requiring them to pass ```null``` or other placeholder values.
+correct/expected variable in the function signature, according to the parsing rules you define.
+It is most useful for public and private APIs where we want to give our users the convenience of omitting variables,
+and not requiring them to pass ```null``` or other placeholder values. Of course, you should design your APIs well,
+with simple function calls with limited number of variation in the signature. Using options objects is a great
+design pattern to keep things simple, but at some point variadic functions become convenient and we must handle 
+them well, without writing buggy code that will fail silently in edge cases.
+
+Extensive testing needs to be completed before this library is totally proven. Also need some sanity checks to make sure this is exactly what people
+need and want. We will incorporate other "types" that can be easily and reliably checked, like 'array'. 
+Unfortunately, type checking beyond simple primitive types is not an effective strategy because you don't know whether the user passed 
+in the argument in the wrong place in the signature or if they passed the wrong value for the right argument.
 
 ## Basic Usage
 
-The following is a function that accepts varargs:
+The following is a function that accepts varargs, and we use Pragmatik to parse the arguments:
 
 ```js
 const pragmatik = require('pragmatik');
@@ -21,6 +32,57 @@ const pragmatik = require('pragmatik');
 function foo(){
  const [a,b,c,d,e] = pragmatik.parse(arguments, rules);
   
+}
+```
+
+so we can call foo above, like so:
+
+```foo(true, {zim:'zam'}, function(){});```
+
+and Pragmatik can be used to parse the values as they are expected to appear, for example:
+
+```js
+const pragmatik = require('pragmatik');
+
+const r = pragmatik.signature({
+
+    mode: 'strict',                        // does not allow two adjacent non-required types to be the same
+    allowExtraneousTrailingVars: false,
+    args: [
+      {
+        type: 'string',
+        required: false,
+      },
+      {
+        type: 'boolean',
+        required: true,
+      },
+      {
+        type: 'object',
+        required: true,
+      },
+      {
+        type: 'boolean',
+        required: false,
+      },
+      {
+        type: 'function',
+        required: false,
+      }
+    ]
+ });
+
+
+function foo(){
+ const [a,b,c,d,e] = pragmatik.parse(arguments, rules);
+ 
+ console.log(a,b,c,d,e); 
+ // a => undefined
+ // b => true
+ // c => {zim:'zam'}
+ // d => undefined
+ // e => function(){}
+ 
 }
 ```
 
@@ -32,54 +94,6 @@ function foo(a,b,c,d,e){
   
 }
 ```
-
-The rules variable, looks like this:
-
-```js
- const rules =  pragmatik.signature({
-
-    mode: 'strict',                         // does not allow two adjacent non-required types to be the same
-    allowExtraneousTrailingVars: false,
-    signatureDescription: '(String s, [Object opts,] Function f)',
-    args: [
-      {
-        type: 'string',
-        required: true,
-        errorMessage: function(r){
-          return 'your unique error message';
-        },
-        checks: [
-          function (val, rule) {
-            assert(val.length > 0, rule.errorMessage);
-          }
-        ]
-      },
-      {
-        type: 'object',
-        required: false,
-        errorMessage: function(r){
-          return 'your unique error message.'
-        },
-        default: function(){
-          return {};
-        },
-        checks: [
-          function (val, rule) {
-            assert(typeof val === 'object' && !Array.isArray(val), rule.errorMessage +
-              ', instead we got => ' + util.inspect(val));
-          }
-        ]
-      },
-      {
-        type: 'function',
-        required: true,
-        errorMessage: function(r){
-          return 'your unique error message.';
-        }
-      }
-    ]
-  }),
-  ```
 
 
 
