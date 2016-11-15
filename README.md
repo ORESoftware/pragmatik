@@ -1,5 +1,5 @@
 
-# PRAGMATIK
+# Pragmatik
 
 This library attempts to solve an age-old problem in JavaScript => how do we correctly parse the arguments inside a function
 that accepts a variable number of arguments? (See "variadic functions" and "varargs"). 
@@ -11,7 +11,6 @@ and not requiring them to pass ```null``` or other placeholder values. Of course
 with simple function calls with limited number of variation in the signature. Using options objects is a great
 design pattern to keep things simple, but at some point variadic functions become convenient and we must handle 
 them well, without writing buggy code that will fail silently in edge cases.
-
 
 
 ### Disclaimer => the Pragmatik library is in beta
@@ -30,6 +29,8 @@ in the argument in the wrong place in the signature or if they passed the wrong 
 
 ## Basic Usage
 
+The Pragmatik library exports two functions: ```parse``` and ```signature```
+
 The following is a function that accepts varargs, and we use Pragmatik to parse the arguments:
 
 ```js
@@ -45,7 +46,8 @@ so we can call foo above, like so:
 
 ```foo(true, {zim:'zam'}, function(){});```
 
-and Pragmatik can be used to parse the values as they are expected to appear, for example:
+and Pragmatik can be used to parse the values as they are expected to appear, for example, first we
+use signature() to define the parsing rules:
 
 ```js
 const pragmatik = require('pragmatik');
@@ -53,7 +55,7 @@ const pragmatik = require('pragmatik');
 const r = pragmatik.signature({
 
     mode: 'strict',                        // does not allow two adjacent non-required types to be the same
-    allowExtraneousTrailingVars: false,
+    allowExtraneousTrailingVars: false,    // no more than 5 arguments allowed
     args: [
       {
         type: 'string',
@@ -92,7 +94,8 @@ function foo(){
 }
 ```
 
-if you want better IDE support, you can do this, but it's fairly unnecessary:
+if you want better better IDE support, you can do the following instead, but it's fairly unnecessary, (especially
+considering the purpose of the library is to support varargs):
 
 ```js
 function foo(a,b,c,d,e){
