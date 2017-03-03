@@ -19,6 +19,11 @@
     "function-arguments": "^1.0.7"
   },
   "devDependencies": {
-    "suman": "github:sumanjs/suman#dev"
+    "suman": "latest",
+    "node-check-fast": "latest",
+    "@types/async": "^2.0.38",
+    "@types/core-js": "^0.9.35",
+    "@types/lodash": "^4.14.50",
+    "@types/node": "^7.0.0"
   }
 }

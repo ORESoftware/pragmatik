@@ -1,0 +1,5 @@
+*.sh
+tsconfig*.json
+test/
+node_modules
+suman.conf.js

@@ -16,7 +16,7 @@ module.exports = data => {  //load async deps for any of your suman tests
     return {
 
         'pragmatik': function(){
-            return require('../../');
+            return require('pragmatik');
         }
 
     }

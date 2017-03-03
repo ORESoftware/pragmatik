@@ -1,8 +1,8 @@
 const suman = require('suman');
-const _Test = suman.init(module);
+const Test = suman.init(module);
 
 
-_Test.describe('basic tests', {}, function (pragmatik, assert) {
+Test.create('basic tests', {}, function (pragmatik, assert) {
 
     const r = pragmatik.signature({
 
@@ -98,7 +98,7 @@ _Test.describe('basic tests', {}, function (pragmatik, assert) {
     });
 
 
-    this.it('basic #2', t => {
+    this.it('basic #2', {throws: /.*/}, t => {
 
         //TODO: this should prob fail if allowExtraneousTrailingVars === false
 

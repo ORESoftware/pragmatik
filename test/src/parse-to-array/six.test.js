@@ -13,7 +13,7 @@ Test.describe('basic tests', {}, function (pragmatik, assert, util) {
         required: false,
         checks: [
           function (val) {  //check to see if the object has a certain constructor or what not
-            assert(val);
+
           }
         ]
       },
@@ -72,7 +72,7 @@ Test.describe('basic tests', {}, function (pragmatik, assert, util) {
 
   });
 
-  this.it('basic #1', t => {
+  this.it('basic #12', t => {
 
     const [a,b,c,d] = foo('',{ m: 'dog' }, function () {
 
@@ -80,7 +80,7 @@ Test.describe('basic tests', {}, function (pragmatik, assert, util) {
 
   });
 
-  this.it('basic #1', t => {
+  this.it('basic #13', t => {
 
     const [a,b,c,d] = foo({ m: 'dog' }, function () {
 

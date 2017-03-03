@@ -1,3 +1,5 @@
+'use strict';
+
 //core
 const assert = require('assert');
 const util = require('util');
@@ -194,6 +196,10 @@ function parse (argz, r, $opts) {
     argsOfA = args[ a ];
 
     let argType = typeof argsOfA;
+    if(argType === 'object' && Array.isArray(argsOfA)){
+      argType = 'array';
+    }
+
     let rulesTemp = rules[ a ];
 
     if (!rulesTemp) { // in the case that a > rulesTemp.length - 1
@@ -317,6 +323,17 @@ function parse (argz, r, $opts) {
     });
     return ret;
   }
+
+  // console.log('r => ',r);
+  // console.log('rules => ',rules);
+
+  rules.forEach(function(r, index){
+      if(r.postChecks){
+        r.postChecks.forEach(function(fn){
+           fn.apply(null, [index, retArgs]);
+        })
+      }
+  });
 
   return retArgs;
 
