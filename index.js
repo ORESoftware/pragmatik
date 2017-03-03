@@ -53,11 +53,11 @@ function signature (r) {
 
       if (!item.required) {
 
-        var matched = false;
-        var matchedIndex = null;
-        var currentIndex = index - 2;
+        let matched = false;
+        let matchedIndex = null;
+        let currentIndex = index - 2;
         while (currentIndex >= 0) {
-          var rule = args[ currentIndex ];
+          let rule = args[ currentIndex ];
           if (rule.type === item.type && !rule.required) {
             matched = true;
             matchedIndex = currentIndex;
@@ -68,9 +68,9 @@ function signature (r) {
 
         if (matched) {
           currentIndex++;  //simply bump it up by 1, once
-          var ok = false;
+          let ok = false;
           while (currentIndex < index) {
-            var rule = args[ currentIndex ];
+            let rule = args[ currentIndex ];
             if (rule.required) {
               ok = true; // at least one required "other-type" is in-between the two same types
               break;
@@ -130,7 +130,7 @@ function runChecks (arg, rule, retArgs) {
 
 function findTypeOfNextRequiredItem (a, rules) {
 
-  for (var i = a; i < rules.length; i++) {
+  for (let i = a; i < rules.length; i++) {
     console.log(rules[i]);
     if (rules[ i ].required === true) {
       return rules[ i ].type;
@@ -157,7 +157,7 @@ function parse (argz, r, $opts) {
   const rules = r.args;
   const parseToObject = $parseToObject === true || !!r.parseToObject;
 
-  var argNames, ret;
+  let argNames, ret;
 
   if (parseToObject) {
     //TODO: note this also won't work in the rare case that pragmatik parse is called in a compound fashion,
@@ -185,16 +185,16 @@ function parse (argz, r, $opts) {
   }
 
   const retArgs = [];
-  // using "a" as var name makes debugging easier because it appears at the top of debugging console
-  var a = 0;
-  var argsOfA;
+  // using "a" as let name makes debugging easier because it appears at the top of debugging console
+  let a = 0;
+  let argsOfA;
 
   while (retArgs.length < rules.length || args[ a ]) {  //args[a] may be undefined
 
     argsOfA = args[ a ];
 
-    var argType = typeof argsOfA;
-    var rulesTemp = rules[ a ];
+    let argType = typeof argsOfA;
+    let rulesTemp = rules[ a ];
 
     if (!rulesTemp) { // in the case that a > rulesTemp.length - 1
       if (r.allowExtraneousTrailingVars === false) {
@@ -208,7 +208,7 @@ function parse (argz, r, $opts) {
       }
     }
 
-    var rulesType = rulesTemp.type;
+    let rulesType = rulesTemp.type;
 
     if (rulesType === argType) {
 
@@ -266,8 +266,8 @@ function parse (argz, r, $opts) {
        if (argsLengthGreaterThanOrEqualToRulesLength) {
 
         if (argsOfA !== undefined) {
-          var errMsg = rulesTemp.errorMessage;
-          var msg = typeof errMsg === 'function' ? errMsg(r) : (errMsg || '');
+          let errMsg = rulesTemp.errorMessage;
+          let msg = typeof errMsg === 'function' ? errMsg(r) : (errMsg || '');
 
           throw new Error(msg + '\nArgument is *not* required at argument index = ' + a +
             ', but type was wrong \n => expected => "'
@@ -278,9 +278,9 @@ function parse (argz, r, $opts) {
         args.splice(a, 0, undefined);
       }
 
-      var fn = rulesTemp.default;
+      let fn = rulesTemp.default;
 
-      var deflt = undefined;  //this assignment is necessary to reassign for each loop
+      let deflt = undefined;  //this assignment is necessary to reassign for each loop
       if (fn && typeof fn !== 'function') {
         throw new Error(' => Pragmatik usage error => "default" property should be undefined or a function.');
       }
@@ -300,8 +300,8 @@ function parse (argz, r, $opts) {
     }
     else {
 
-      var errMsg = rulesTemp.errorMessage;
-      var msg = typeof errMsg === 'function' ? errMsg(r) : (errMsg || '');
+      let errMsg = rulesTemp.errorMessage;
+      let msg = typeof errMsg === 'function' ? errMsg(r) : (errMsg || '');
 
       throw new Error(msg + '\nArgument is required at argument index = ' + a + ', ' +
         'but type was wrong \n => expected => "'
