@@ -1,8 +1,8 @@
 'use strict';
 
 //core
-const assert = require('assert');
-const util = require('util');
+import * as assert from 'assert';
+import * as util from 'util';
 
 //npm
 const debug = require('debug')('pragmatik');
@@ -21,11 +21,47 @@ const types = [
     'function'
 ];
 
-function signature (r) {
+type Types =
+    'object' |
+        'array' |
+        'integer' |
+        'number' |
+        'string' |
+        'boolean' |
+        'null' |
+        'undefined' |
+        'function'
+
+
+declare interface Rule {
+    type: string,
+    required: boolean,
+    default?: Function,
+    errorMessage: string,
+    checks?: Array<Function>,
+    postChecks?: Array<Function>
+}
+
+declare interface Rules {
+    mode?: string,
+    signatureDescription?: string,
+    parseToObject?: boolean,
+    allowExtraneousTrailingVars?: boolean,
+    extraneousVarsErrorMessage?: string,
+    args: Array<Rule>
+}
+
+declare interface Opts {
+    parseToObject?: boolean,
+    preParsed?: boolean
+
+}
+
+function signature(r: Rules) {
 
     assert(Array.isArray(r.args), ' => "Pragmatik" usage error => Please define an "args" array property in your definition object.');
-    const errors = [];
-    const args = r.args;
+    const errors: Array<string | Error> = [];
+    const args: Array<Rule> = r.args;
 
     args.forEach(function (item, index, arr) {
 
@@ -34,7 +70,7 @@ function signature (r) {
 
         //check to see if two adjacent items of the same type are both required
         if (index > 0) {
-            const prior = arr[ index - 1 ];
+            const prior = arr[index - 1];
             const priorRequired = prior.required;
             if (!priorRequired) {
                 if (prior.type === item.type) {
@@ -59,7 +95,7 @@ function signature (r) {
                 let matchedIndex = null;
                 let currentIndex = index - 2;
                 while (currentIndex >= 0) {
-                    let rule = args[ currentIndex ];
+                    let rule = args[currentIndex];
                     if (rule.type === item.type && !rule.required) {
                         matched = true;
                         matchedIndex = currentIndex;
@@ -72,7 +108,7 @@ function signature (r) {
                     currentIndex++;  //simply bump it up by 1, once
                     let ok = false;
                     while (currentIndex < index) {
-                        let rule = args[ currentIndex ];
+                        let rule = args[currentIndex];
                         if (rule.required) {
                             ok = true; // at least one required "other-type" is in-between the two same types
                             break;
@@ -83,7 +119,7 @@ function signature (r) {
                     if (!ok) {
                         errors.push('Two non-adjacent non-required arguments of the same type are' +
                             ' not separated by required arguments => '
-                            + '\n => arg index => ' + matchedIndex + ' => ' + util.inspect(args[ matchedIndex ])
+                            + '\n => arg index => ' + matchedIndex + ' => ' + util.inspect(args[matchedIndex])
                             + '\n => arg index => ' + index + ' => ' + util.inspect(item));
                     }
                 }
@@ -100,20 +136,20 @@ function signature (r) {
     return r;
 }
 
-function getUniqueArrayOfStrings (a) {
-    return a.filter(function (item, i, ar) {
+function getUniqueArrayOfStrings(a : Array<string>) {
+    return a.filter(function (item: Object, i: number, ar: Array<Object>) {
             return ar.indexOf(item) === i;
         }).length === a.length;
 }
 
-function runChecks (arg, rule, retArgs) {
+function runChecks(arg, rule, retArgs) {
 
-    const errors = [];
+    const errors: Array<Error> = [];
 
     if (Array.isArray(rule.checks)) {
-        rule.checks.forEach(function (fn) {
+        rule.checks.forEach(function (fn: Function) {
             try {
-                fn.apply(null, [ arg, rule, retArgs ]);
+                fn.apply(null, [arg, rule, retArgs]);
             }
             catch (err) {
                 errors.push(err);
@@ -130,25 +166,25 @@ function runChecks (arg, rule, retArgs) {
 
 }
 
-function findTypeOfNextRequiredItem (a, rules) {
+function findTypeOfNextRequiredItem(a, rules) {
 
     for (let i = a; i < rules.length; i++) {
         console.log(rules[i]);
-        if (rules[ i ].required === true) {
-            return rules[ i ].type;
+        if (rules[i].required === true) {
+            return rules[i].type;
         }
     }
 
     return null;
 }
 
-function parse (argz, r, $opts) {
+function parse(argz: IArguments, r: Rules, $opts: Opts): Object {
 
     const opts = $opts || {};
     const $parseToObject = !!opts.parseToObject;
     const preParsed = !!opts.preParsed;
 
-    const args = Array.prototype.slice.call(argz); //should work if args is arguments type or already an array
+    const args = Array.from(argz); //should work if args is arguments type or already an array
 
     if (preParsed) {
         return args;
@@ -156,10 +192,10 @@ function parse (argz, r, $opts) {
 
     debug('\n\n', 'original args => \n', args, '\n\n');
 
-    const rules = r.args;
+    const rules: Array<Rule> = r.args;
     const parseToObject = $parseToObject === true || !!r.parseToObject;
 
-    let argNames, ret;
+    let argNames: Array<string>, ret: Object;
 
     if (parseToObject) {
         //TODO: note this also won't work in the rare case that pragmatik parse is called in a compound fashion,
@@ -176,35 +212,38 @@ function parse (argz, r, $opts) {
     const argsLengthGreaterThanRulesLength = args.length > rules.length;
     const argsLengthGreaterThanOrEqualToRulesLength = args.length >= rules.length;
 
-    if (argsLengthGreaterThanRulesLength && rules.allowExtraneousTrailingVars === false) {
+    if (argsLengthGreaterThanRulesLength && r.allowExtraneousTrailingVars === false) {
         throw new Error('=> Usage error from "pragmatik" library => arguments length is greater than length of rules array,' +
             ' and "allowExtraneousTrailingVars" is explicitly set to false.');
     }
 
-    const requiredLength = rules.filter(item => item.required);
+    const requiredLength = rules.filter(item => item.required).length;
     if (requiredLength > args.length) {
         throw new Error('"Pragmatic" rules dictate that there are more required args than those passed to function.');
     }
 
-    const retArgs = [];
+    const retArgs: Array<Object> = [];
     // using "a" as let name makes debugging easier because it appears at the top of debugging console
     let a = 0;
-    let argsOfA;
+    let argsOfA: Rule;
 
-    while (retArgs.length < rules.length || args[ a ]) {  //args[a] may be undefined
+    while (retArgs.length < rules.length || args[a]) {  //args[a] may be undefined
 
-        argsOfA = args[ a ];
+        argsOfA = args[a];
 
-        let argType = typeof argsOfA;
-        if(argType === 'object' && Array.isArray(argsOfA)){
+        let argType: Types = typeof argsOfA;
+        if (argType === 'object' && Array.isArray(argsOfA)) {
             argType = 'array';
         }
+        else if (argType === 'object' && argsOfA === null) {
+            argType = 'null';
+        }
 
-        let rulesTemp = rules[ a ];
+        let rulesTemp = rules[a];
 
         if (!rulesTemp) { // in the case that a > rulesTemp.length - 1
             if (r.allowExtraneousTrailingVars === false) {
-                throw new Error('Extraneous variable passed for index => ' + a + ' => with value ' + args[ a ] + '\n' +
+                throw new Error('Extraneous variable passed for index => ' + a + ' => with value ' + args[a] + '\n' +
                     (r.signatureDescription ? ('The function signature is => ' + r.signatureDescription) : ''));
             }
             else {
@@ -214,16 +253,16 @@ function parse (argz, r, $opts) {
             }
         }
 
-        let rulesType = rulesTemp.type;
+        let rulesType: string = rulesTemp.type;
 
         if (rulesType === argType) {
 
             //if the type matches, then let's run the validation checks
-            runChecks(args[ a ], rulesTemp, retArgs);
+            runChecks(args[a], rulesTemp, retArgs);
 
             if (parseToObject) {
                 retArgs.push({
-                    name: argNames[ a ],
+                    name: argNames[a],
                     value: argsOfA
                 });
             }
@@ -235,12 +274,12 @@ function parse (argz, r, $opts) {
         else if (a > retArgs.length) {
 
             if (r.allowExtraneousTrailingVars === false) {
-                throw new Error('Extraneous variable passed for index => ' + a + ' => with value ' + args[ a ]);
+                throw new Error('Extraneous variable passed for index => ' + a + ' => with value ' + args[a]);
             }
 
             if (parseToObject) {
                 retArgs.push({
-                    name: argNames[ a ],
+                    name: argNames[a],
                     value: argsOfA
                 });
             }
@@ -252,8 +291,8 @@ function parse (argz, r, $opts) {
         else if (!rulesTemp.required) {
 
             // have to compare against rules.length - 1, not rules.length because we haven't pushed to the array yet
-            if (r.allowExtraneousTrailingVars === false && (retArgs.length > (rules.length - 1)) && args[ a ]) {
-                throw new Error('Extraneous variable passed for => "' + argNames[ a ] + '" => ' + util.inspect(args[ a ]));
+            if (r.allowExtraneousTrailingVars === false && (retArgs.length > (rules.length - 1)) && args[a]) {
+                throw new Error('Extraneous variable passed for => "' + argNames[a] + '" => ' + util.inspect(args[a]));
             }
 
             // if we pass (undefined, {}, function(){})
@@ -286,7 +325,7 @@ function parse (argz, r, $opts) {
 
             let fn = rulesTemp.default;
 
-            let deflt = undefined;  //this assignment is necessary to reassign for each loop
+            let deflt : Object = undefined;  //this assignment is necessary to reassign for each loop
             if (fn && typeof fn !== 'function') {
                 throw new Error(' => Pragmatik usage error => "default" property should be undefined or a function.');
             }
@@ -296,7 +335,7 @@ function parse (argz, r, $opts) {
 
             if (parseToObject) {
                 retArgs.push({
-                    name: argNames[ a ],
+                    name: argNames[a],
                     value: deflt
                 });
             }
@@ -317,23 +356,20 @@ function parse (argz, r, $opts) {
         a++;
     }
 
-    if (parseToObject) {
-        retArgs.forEach(function (item) {
-            ret[ item.name ] = item.value;
-        });
-        return ret;
-    }
-
-    // console.log('r => ',r);
-    // console.log('rules => ',rules);
-
-    rules.forEach(function(r, index){
-        if(r.postChecks){
-            r.postChecks.forEach(function(fn){
+    rules.forEach(function (r, index) {
+        if (r.postChecks) {
+            r.postChecks.forEach(function (fn) {
                 fn.apply(null, [index, retArgs]);
             })
         }
     });
+
+    if (parseToObject) {
+        retArgs.forEach(function (item) {
+            ret[item.name] = item.value;
+        });
+        return ret;
+    }
 
     return retArgs;
 
