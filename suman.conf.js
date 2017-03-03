@@ -17,8 +17,8 @@ module.exports = Object.freeze({
     sumanHelpersDir: 'test/.suman',
     transpile: false,                          //default, can be overridden with command line
     testDir: 'test',
-    testSrcDir: 'test/test-src',
-    testTargetDir: 'test/test-target',
+    testSrcDir: 'test/src',
+    testTargetDir: 'test/target',
     verbosity: 5,
     defaultHookTimeout: 5000,
     defaultTestCaseTimeout: 5000,
