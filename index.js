@@ -70,7 +70,7 @@ function signature(r) {
         }
     });
     if (errors.length) {
-        throw new Error(errors.map(function (e) { return (e.stack || e); }).join('\n\n'));
+        throw new Error(errors.join('\n\n'));
     }
     return r;
 }
@@ -87,7 +87,7 @@ function runChecks(arg, rule, retArgs) {
                 fn.apply(null, [arg, rule, retArgs]);
             }
             catch (err) {
-                errors.push(err);
+                errors.push(err.stack || err);
             }
         });
     }
@@ -95,17 +95,8 @@ function runChecks(arg, rule, retArgs) {
         throw new Error(' => Pragmatic usage error => "checks" property should be an array => ' + util.inspect(rule));
     }
     if (errors.length) {
-        throw new Error(errors.map(function (e) { return (e.stack || String(e)); }).join('\n\n\n'));
+        throw new Error(errors.join('\n\n\n'));
     }
-}
-function findTypeOfNextRequiredItem(a, rules) {
-    for (var i = a; i < rules.length; i++) {
-        console.log(rules[i]);
-        if (rules[i].required === true) {
-            return rules[i].type;
-        }
-    }
-    return null;
 }
 function parse(argz, r, $opts) {
     var opts = $opts || {};
