@@ -1,4 +1,10 @@
 *.sh
+*.md
+*.txt
+*.log
+*.ts
+.idea
+.vscode
 tsconfig*.json
 test/
 node_modules
