@@ -7,5 +7,5 @@
 .vscode
 tsconfig*.json
 test/
-node_modules
+node_modules/
 suman.conf.js

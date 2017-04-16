@@ -74,6 +74,7 @@ function signature(r) {
     }
     return r;
 }
+exports.signature = signature;
 function getUniqueArrayOfStrings(a) {
     return a.filter(function (item, i, ar) {
         return ar.indexOf(item) === i;
@@ -226,7 +227,7 @@ function parse(argz, r, $opts) {
     rules.forEach(function (r, index) {
         if (r.postChecks) {
             r.postChecks.forEach(function (fn) {
-                fn.apply(null, [index, retArgs]);
+                fn.call(null, index, retArgs);
             });
         }
     });
@@ -238,7 +239,4 @@ function parse(argz, r, $opts) {
     }
     return retArgs;
 }
-module.exports = {
-    parse: parse,
-    signature: signature
-};
+exports.parse = parse;
