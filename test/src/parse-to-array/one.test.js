@@ -2,7 +2,7 @@ const suman = require('suman');
 const Test = suman.init(module);
 
 
-Test.describe('basic tests', {}, function (pragmatik, assert, util) {
+Test.describe('basic tests', {}, function (pragmatik, assert, util, it) {
 
     const r = pragmatik.signature({
 
@@ -64,7 +64,7 @@ Test.describe('basic tests', {}, function (pragmatik, assert, util) {
     }
 
 
-    this.it('basic #1', t => {
+    it('basic #1', t => {
 
         const [a,b,c,d,e,f,g,h,i] = foo({a: 'b'}, 'yolo', 'mogo', {z: 'e'}, {m: 'k'});
 

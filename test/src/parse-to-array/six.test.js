@@ -1,7 +1,7 @@
 const suman = require('suman');
 const Test = suman.init(module);
 
-Test.describe('basic tests', {}, function (pragmatik, assert, util) {
+Test.describe('basic tests', {}, function (pragmatik, assert, util, it) {
 
   const r = pragmatik.signature({
 
@@ -50,7 +50,7 @@ Test.describe('basic tests', {}, function (pragmatik, assert, util) {
     return pragmatik.parse(tripleFoo.apply(null, arguments), r);
   }
 
-  this.it('basic #1', t => {
+  it('basic #1', t => {
 
     const args = [ undefined, { m: 'hi' }, function () {} ];
 
@@ -72,7 +72,7 @@ Test.describe('basic tests', {}, function (pragmatik, assert, util) {
 
   });
 
-  this.it('basic #12', t => {
+  it('basic #12', t => {
 
     const [a,b,c,d] = foo('',{ m: 'dog' }, function () {
 
@@ -80,7 +80,7 @@ Test.describe('basic tests', {}, function (pragmatik, assert, util) {
 
   });
 
-  this.it('basic #13', t => {
+  it('basic #13', t => {
 
     const [a,b,c,d] = foo({ m: 'dog' }, function () {
 

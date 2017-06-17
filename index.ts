@@ -21,49 +21,46 @@ const types = [
   'function'
 ];
 
-export namespace prag {
 
-  export interface RetArg {
-    name: 'string',
-    value: Object
-  }
+export interface IPragRetArg {
+  name: 'string',
+  value: Object
+}
 
-  export interface Rule {
-    type: string,
-    required: boolean,
-    default?: Function,
-    errorMessage: string,
-    checks?: Array<Function>,
-    postChecks?: Array<Function>
-  }
+export interface IPragRule {
+  type: string,
+  required: boolean,
+  default?: Function,
+  errorMessage: string,
+  checks?: Array<Function>,
+  postChecks?: Array<Function>
+}
 
-  export interface Rules {
-    mode?: string,
-    signatureDescription?: string,
-    parseToObject?: boolean,
-    allowExtraneousTrailingVars?: boolean,
-    extraneousVarsErrorMessage?: string,
-    args: Array<Rule>
-  }
+export interface IPragRules {
+  mode?: string,
+  signatureDescription?: string,
+  parseToObject?: boolean,
+  allowExtraneousTrailingVars?: boolean,
+  extraneousVarsErrorMessage?: string,
+  args: Array<IPragRule>
+}
 
-  export interface Opts {
-    parseToObject?: boolean,
-    preParsed?: boolean
-
-  }
-
-  export interface ObjectRet {
-    [key: string]: any;
-  }
+export interface IPragOpts {
+  parseToObject?: boolean,
+  preParsed?: boolean
 
 }
 
+export interface IPragObjRet {
+  [key: string]: any;
+}
 
-export function signature(r: prag.Rules) {
+
+export function signature(r: IPragRules) {
 
   assert(Array.isArray(r.args), ' => "Pragmatik" usage error => Please define an "args" array property in your definition object.');
   const errors: Array<string> = [];
-  const args: Array<prag.Rule> = r.args;
+  const args: Array<IPragRule> = r.args;
 
   args.forEach(function (item, index, arr) {
 
@@ -144,7 +141,7 @@ function getUniqueArrayOfStrings(a: Array<string>) {
     }).length === a.length;
 }
 
-function runChecks(arg: Object, rule: prag.Rule, retArgs: Array<Object>): void {
+function runChecks(arg: Object, rule: IPragRule, retArgs: Array<Object>): void {
 
   let errors: Array<string> = [];
 
@@ -169,7 +166,7 @@ function runChecks(arg: Object, rule: prag.Rule, retArgs: Array<Object>): void {
 }
 
 
-export function parse(argz: IArguments, r: prag.Rules, $opts: prag.Opts): Object {
+export function parse(argz: IArguments, r: IPragRules, $opts: IPragOpts): Object {
 
   const opts = $opts || {};
   const $parseToObject = !!opts.parseToObject;
@@ -183,10 +180,10 @@ export function parse(argz: IArguments, r: prag.Rules, $opts: prag.Opts): Object
 
   debug('\n\n', 'original args => \n', args, '\n\n');
 
-  const rules: Array<prag.Rule> = r.args;
+  const rules: Array<IPragRule> = r.args;
   const parseToObject = $parseToObject === true || !!r.parseToObject;
 
-  let argNames: Array<string>, ret: prag.ObjectRet;
+  let argNames: Array<string>, ret: IPragObjRet;
 
   if (parseToObject) {
     //TODO: note this also won't work in the rare case that pragmatik parse is called in a compound fashion,
@@ -216,7 +213,7 @@ export function parse(argz: IArguments, r: prag.Rules, $opts: prag.Opts): Object
   const retArgs: Array<Object> = [];
   // using "a" as let name makes debugging easier because it appears at the top of debugging console
   let a = 0;
-  let argsOfA: prag.Rule;
+  let argsOfA: IPragRule;
 
   while (retArgs.length < rules.length || args[a]) {  //args[a] may be undefined
 
@@ -344,7 +341,7 @@ export function parse(argz: IArguments, r: prag.Rules, $opts: prag.Opts): Object
   });
 
   if (parseToObject) {
-    retArgs.forEach(function (item: prag.RetArg): void {
+    retArgs.forEach(function (item: IPragRetArg): void {
       ret[item.name] = item.value;
     });
     return ret;

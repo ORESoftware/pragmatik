@@ -10,7 +10,8 @@
     "arguments",
     "variadic",
     "varargs",
-    "nodejs"
+    "nodejs",
+    "dynamic"
   ],
   "author": "Olegzandr Denman",
   "license": "ISC",
@@ -19,7 +20,7 @@
     "function-arguments": "^1.0.7"
   },
   "devDependencies": {
-    "suman": "latest",
+    "suman": "github:sumanjs/suman#rebase_branch",
     "node-check-fast": "latest",
     "@types/async": "^2.0.38",
     "@types/core-js": "^0.9.35",

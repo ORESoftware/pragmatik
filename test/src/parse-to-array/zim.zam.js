@@ -1,7 +1,7 @@
 const suman = require('suman');
 const Test = suman.init(module);
 
-Test.create('basic tests', function (pragmatik, assert) {
+Test.create('basic tests', function (pragmatik, assert, it) {
 
   const r = pragmatik.signature({
 
@@ -35,7 +35,7 @@ Test.create('basic tests', function (pragmatik, assert) {
     return pragmatik.parse(arguments, r);
   }
 
-  this.it('zims and zams (1)', t => {
+  it('zims and zams (1)', t => {
 
     const [a,b,c,d,e] = foo(true, { zim: 'zam' }, function () {});
     assert.equal(a, undefined, 'a is not undefined.');
@@ -46,13 +46,13 @@ Test.create('basic tests', function (pragmatik, assert) {
 
   });
 
-  this.it('zims and zams (2)', { throws: /Argument is required at argument index = 1, but type was wrong/ }, t => {
+  it('zims and zams (2)', { throws: /Argument is required at argument index = 1, but type was wrong/ }, t => {
 
     const [a,b,c,d,e] = foo('dog', { zim: 'zam' }, function () {});
 
   });
 
-  this.it('zims and zams (3)', { throws: /Argument is required at argument index = 2, but type was wrong/ }, t => {
+  it('zims and zams (3)', { throws: /Argument is required at argument index = 2, but type was wrong/ }, t => {
 
     const [a,b,c,d,e] = foo('dog', false, function () {});
 
