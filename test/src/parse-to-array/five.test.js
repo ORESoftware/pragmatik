@@ -2,7 +2,7 @@ const suman = require('suman');
 const Test = suman.init(module);
 
 
-Test.create('basic tests', {}, function (pragmatik, assert) {
+Test.create('basic tests', function (pragmatik, assert, it, describe) {
 
     const r = pragmatik.signature({
 
@@ -41,9 +41,9 @@ Test.create('basic tests', {}, function (pragmatik, assert) {
 
 
 
-    this.describe('bs', function () {
+    describe('bs', function () {
 
-        this.it('basic #1', t => {
+        it('basic #1', t => {
 
             assert.throws(function () {
                 const [a, b, c, d] = foo('oh yes', {a: 'b'});
@@ -51,7 +51,7 @@ Test.create('basic tests', {}, function (pragmatik, assert) {
 
         });
 
-        this.it('basic #1', t => {
+        it('basic #1', t => {
 
             assert.throws(function () {
                 const [a, b, c, d] = foo({a: 'b'});
@@ -59,7 +59,7 @@ Test.create('basic tests', {}, function (pragmatik, assert) {
 
         });
 
-        this.it('basic #1', t => {
+        it('basic #1', t => {
 
             const [a, b, c, d]= foo(null, function z() {
             });
@@ -71,7 +71,7 @@ Test.create('basic tests', {}, function (pragmatik, assert) {
 
         });
 
-        this.it('basic #1', t => {
+        it('basic #1', t => {
 
             const [a, b, c, d] = foo('cheese', function xyz() {
             });
@@ -84,7 +84,7 @@ Test.create('basic tests', {}, function (pragmatik, assert) {
         });
 
 
-        this.it('basic #2', t => {
+        it('basic #2', t => {
 
             const [a, b, c, d] = foo('bar', function noop() {
             });
@@ -98,7 +98,7 @@ Test.create('basic tests', {}, function (pragmatik, assert) {
     });
 
 
-    this.it('basic #2', {throws: /.*/}, t => {
+    it('basic #2', {throws: /.*/}, t => {
 
         //TODO: this should prob fail if allowExtraneousTrailingVars === false
 
@@ -116,7 +116,7 @@ Test.create('basic tests', {}, function (pragmatik, assert) {
 
     });
 
-    this.it('basic #2', {}, t => {
+    it('basic #2', {}, t => {
 
         // throw new Error('test error message 3');
 

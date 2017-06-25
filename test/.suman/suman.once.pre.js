@@ -12,6 +12,10 @@ module.exports = () => {
 
     return {
 
+      dependencies: {
+
+      }
+
 
     }
 

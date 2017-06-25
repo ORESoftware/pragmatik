@@ -10,7 +10,8 @@
     "arguments",
     "variadic",
     "varargs",
-    "nodejs"
+    "nodejs",
+    "dynamic"
   ],
   "author": "Olegzandr Denman",
   "license": "ISC",

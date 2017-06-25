@@ -7,19 +7,20 @@
 // which is actually pretty cool
 // ******************************************************************************************************************
 
-
 const http = require('http');
-
 
 module.exports = data => {  //load async deps for any of your suman tests
 
-    return {
+  return {
 
-        'pragmatik': function(){
-            return require('pragmatik');
-        }
+    dependencies: {
+
+      'pragmatik': function () {
+        return require('pragmatik');
+      }
 
     }
 
+  }
 
 };
