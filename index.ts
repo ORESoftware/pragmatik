@@ -5,7 +5,6 @@ import * as assert from 'assert';
 import * as util from 'util';
 
 //npm
-const debug = require('debug')('pragmatik');
 const fnargs = require('function-arguments');
 
 //project
@@ -20,7 +19,6 @@ const types = [
   'undefined',
   'function'
 ];
-
 
 export interface IPragRetArg {
   name: 'string',
@@ -54,7 +52,6 @@ export interface IPragOpts {
 export interface IPragObjRet {
   [key: string]: any;
 }
-
 
 export function signature(r: IPragRules) {
 
@@ -137,8 +134,8 @@ export function signature(r: IPragRules) {
 
 function getUniqueArrayOfStrings(a: Array<string>) {
   return a.filter(function (item: Object, i: number, ar: Array<Object>) {
-      return ar.indexOf(item) === i;
-    }).length === a.length;
+    return ar.indexOf(item) === i;
+  }).length === a.length;
 }
 
 function runChecks(arg: Object, rule: IPragRule, retArgs: Array<Object>): void {
@@ -165,12 +162,11 @@ function runChecks(arg: Object, rule: IPragRule, retArgs: Array<Object>): void {
 
 }
 
-
 export function parse(argz: IArguments, r: IPragRules, $opts: IPragOpts): Object {
 
   const opts = $opts || {};
-  const $parseToObject = !!opts.parseToObject;
-  const preParsed = !!opts.preParsed;
+  const $parseToObject = Boolean(opts.parseToObject);
+  const preParsed = Boolean(opts.preParsed);
 
   const args = Array.from(argz); //should work if args is arguments type or already an array
 
@@ -178,10 +174,8 @@ export function parse(argz: IArguments, r: IPragRules, $opts: IPragOpts): Object
     return args;
   }
 
-  debug('\n\n', 'original args => \n', args, '\n\n');
-
   const rules: Array<IPragRule> = r.args;
-  const parseToObject = $parseToObject === true || !!r.parseToObject;
+  const parseToObject = $parseToObject === true || Boolean(r.parseToObject);
 
   let argNames: Array<string>, ret: IPragObjRet;
 
@@ -282,7 +276,6 @@ export function parse(argz: IArguments, r: IPragRules, $opts: IPragOpts): Object
       if (r.allowExtraneousTrailingVars === false && (retArgs.length > (rules.length - 1)) && args[a]) {
         throw new Error('Extraneous variable passed for => "' + argNames[a] + '" => ' + util.inspect(args[a]));
       }
-
 
       if (argsLengthGreaterThanOrEqualToRulesLength) {
 

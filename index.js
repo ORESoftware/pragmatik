@@ -2,7 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var assert = require("assert");
 var util = require("util");
-var debug = require('debug')('pragmatik');
 var fnargs = require('function-arguments');
 var types = [
     'object',
@@ -101,15 +100,14 @@ function runChecks(arg, rule, retArgs) {
 }
 function parse(argz, r, $opts) {
     var opts = $opts || {};
-    var $parseToObject = !!opts.parseToObject;
-    var preParsed = !!opts.preParsed;
+    var $parseToObject = Boolean(opts.parseToObject);
+    var preParsed = Boolean(opts.preParsed);
     var args = Array.from(argz);
     if (preParsed) {
         return args;
     }
-    debug('\n\n', 'original args => \n', args, '\n\n');
     var rules = r.args;
-    var parseToObject = $parseToObject === true || !!r.parseToObject;
+    var parseToObject = $parseToObject === true || Boolean(r.parseToObject);
     var argNames, ret;
     if (parseToObject) {
         var callee = argz.callee;

@@ -16,7 +16,6 @@
   "author": "Olegzandr Denman",
   "license": "ISC",
   "dependencies": {
-    "debug": "^2.2.0",
     "function-arguments": "^1.0.7"
   },
   "devDependencies": {

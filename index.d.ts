@@ -1,31 +1,29 @@
-export declare namespace prag {
-    interface RetArg {
-        name: 'string';
-        value: Object;
-    }
-    interface Rule {
-        type: string;
-        required: boolean;
-        default?: Function;
-        errorMessage: string;
-        checks?: Array<Function>;
-        postChecks?: Array<Function>;
-    }
-    interface Rules {
-        mode?: string;
-        signatureDescription?: string;
-        parseToObject?: boolean;
-        allowExtraneousTrailingVars?: boolean;
-        extraneousVarsErrorMessage?: string;
-        args: Array<Rule>;
-    }
-    interface Opts {
-        parseToObject?: boolean;
-        preParsed?: boolean;
-    }
-    interface ObjectRet {
-        [key: string]: any;
-    }
+export interface IPragRetArg {
+    name: 'string';
+    value: Object;
 }
-export declare function signature(r: prag.Rules): prag.Rules;
-export declare function parse(argz: IArguments, r: prag.Rules, $opts: prag.Opts): Object;
+export interface IPragRule {
+    type: string;
+    required: boolean;
+    default?: Function;
+    errorMessage: string;
+    checks?: Array<Function>;
+    postChecks?: Array<Function>;
+}
+export interface IPragRules {
+    mode?: string;
+    signatureDescription?: string;
+    parseToObject?: boolean;
+    allowExtraneousTrailingVars?: boolean;
+    extraneousVarsErrorMessage?: string;
+    args: Array<IPragRule>;
+}
+export interface IPragOpts {
+    parseToObject?: boolean;
+    preParsed?: boolean;
+}
+export interface IPragObjRet {
+    [key: string]: any;
+}
+export declare function signature(r: IPragRules): IPragRules;
+export declare function parse(argz: IArguments, r: IPragRules, $opts: IPragOpts): Object;
