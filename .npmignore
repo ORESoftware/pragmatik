@@ -1,11 +1,25 @@
+
+### folders
+.idea
+.vscode
+test
+node_modules
+
+### matching
 *.sh
 *.md
 *.txt
 *.log
 *.ts
-.idea
-.vscode
-tsconfig*.json
-test/
-node_modules/
+*.json
+
+### files
 suman.conf.js
+.npmignore
+.gitignore
+package-lock.json
+yarn.lock
+
+### negation
+!*.d.ts
+
