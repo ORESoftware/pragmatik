@@ -12,12 +12,12 @@ node_modules
 *.log
 *.ts
 *.json
+*.yml
 
 ### files
 suman.conf.js
 .npmignore
 .gitignore
-package-lock.json
 yarn.lock
 
 ### negation

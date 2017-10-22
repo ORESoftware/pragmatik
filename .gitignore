@@ -6,6 +6,7 @@ coverage
 
 ### matching
 *.log
+*.DS_Store
 
 ### files
 package-lock.json
