@@ -4,7 +4,7 @@
   "description": "Parse arguments correctly for variadic functions",
   "main": "index.js",
   "scripts": {
-    "test": "./@test.sh"
+    "test": "./scripts/test.sh"
   },
   "keywords": [
     "arguments",
@@ -14,15 +14,16 @@
     "dynamic"
   ],
   "author": "Olegzandr Denman",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
-    "function-arguments": "^1.0.8"
+    "chalk": "^2.3.0",
+    "log-prepend": "latest"
   },
   "devDependencies": {
-    "node-check-fast": "latest",
     "@types/async": "^2.0.38",
     "@types/core-js": "^0.9.35",
     "@types/lodash": "^4.14.50",
-    "@types/node": "^7.0.0"
+    "@types/node": "^7.0.0",
+    "node-check-fast": "latest"
   }
 }

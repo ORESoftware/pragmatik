@@ -1,24 +1,34 @@
 'use strict';
 
 //core
-import * as assert from 'assert';
-import * as util from 'util';
+import assert = require('assert');
+import util = require('util');
 
 //npm
-const fnargs = require('function-arguments');
+import chalk = require('chalk');
+const {lp} = require('log-prepend');
+
+const log = {
+  info: lp(' [pragmatik] ', process.stdout),
+  error: lp(' [pragmatik error] ', process.stderr)
+};
 
 //project
-const types = [
-  'object',
-  'array',
-  'integer',
-  'number',
-  'string',
-  'boolean',
-  'null',
-  'undefined',
-  'function'
-];
+const types = <any> {
+  'object': true,
+  'array': true,
+  'integer': true,
+  'number': true,
+  'string': true,
+  'boolean': true,
+  'function': true
+};
+
+const bannedTypes = <any>{
+  'undefined': true,
+  'null': true
+};
+
 
 export interface IPragRetArg {
   name: 'string',
@@ -46,24 +56,30 @@ export interface IPragRules {
 export interface IPragOpts {
   parseToObject?: boolean,
   preParsed?: boolean
-
 }
 
 export interface IPragObjRet {
   [key: string]: any;
 }
 
-export function signature(r: IPragRules) {
-
+export const signature = function (r: IPragRules) {
+  
   assert(Array.isArray(r.args), ' => "Pragmatik" usage error => Please define an "args" array property in your definition object.');
   const errors: Array<string> = [];
   const args: Array<IPragRule> = r.args;
-
+  
   args.forEach(function (item, index, arr) {
-
-    assert(types.indexOf(item.type) >= 0, 'Your item type is wrong or undefined, for rule => \n\n' + util.inspect(item)
-      + '\n\nin the following definition => \n' + util.inspect(r) + '\n\n');
-
+    
+    if(bannedTypes[String(item.type).trim()]){
+      throw new Error('The following types cannot be used as a pragmatik type: ' + util.inspect(Object.keys(bannedTypes)));
+    }
+    
+    if(!types[String(item.type).trim()]){
+      throw new Error('Your item type is wrong or undefined, for rule => \n\n' + util.inspect(item)
+      + '\n\nin the following definition => \n' + util.inspect(r))
+    }
+    
+    
     //check to see if two adjacent items of the same type are both required
     if (index > 0) {
       const prior = arr[index - 1];
@@ -77,16 +93,16 @@ export function signature(r: IPragRules) {
         }
       }
     }
-
-    //check to see that if something like "string object string", to make sure object is required
+    
+    // check to see that if something like "string object string", to make sure object is required
     // if both strings are not required
-    //or more generally check to see that if something like "string object function string",
+    // or more generally check to see that if something like "string object function string",
     // to make sure both object and function are required
-
+    
     if (index > 1) {
-
+      
       if (!item.required) {
-
+        
         let matched = false;
         let matchedIndex: number = null;
         let currentIndex = index - 2;
@@ -99,7 +115,7 @@ export function signature(r: IPragRules) {
           }
           currentIndex--;
         }
-
+        
         if (matched) {
           currentIndex++;  //simply bump it up by 1, once
           let ok = false;
@@ -111,7 +127,7 @@ export function signature(r: IPragRules) {
             }
             currentIndex++;
           }
-
+          
           if (!ok) {
             errors.push('Two non-adjacent non-required arguments of the same type are' +
               ' not separated by required arguments => '
@@ -120,28 +136,21 @@ export function signature(r: IPragRules) {
           }
         }
       }
-
     }
-
+    
   });
-
+  
   if (errors.length) {
     throw new Error(errors.join('\n\n'));
   }
-
+  
   return r;
-}
+};
 
-function getUniqueArrayOfStrings(a: Array<string>) {
-  return a.filter(function (item: Object, i: number, ar: Array<Object>) {
-    return ar.indexOf(item) === i;
-  }).length === a.length;
-}
-
-function runChecks(arg: Object, rule: IPragRule, retArgs: Array<Object>): void {
-
+const runChecks = function (arg: Object, rule: IPragRule, retArgs: Array<Object>): void {
+  
   let errors: Array<string> = [];
-
+  
   if (Array.isArray(rule.checks)) {
     rule.checks.forEach(function (fn: Function) {
       try {
@@ -153,80 +162,70 @@ function runChecks(arg: Object, rule: IPragRule, retArgs: Array<Object>): void {
     });
   }
   else if (rule.checks) {
-    throw new Error(' => Pragmatic usage error => "checks" property should be an array => ' + util.inspect(rule));
+    throw new Error('Pragmatic usage error => "checks" property should be an array => ' + util.inspect(rule));
   }
-
+  
   if (errors.length) {
-    throw new Error(errors.join('\n\n\n'));
+    throw new Error(errors.join('\n\n'));
   }
+  
+};
 
-}
+const getSignatureDesc = function (r: IPragRules) {
+  return r.signatureDescription ? (' => The function signature is => ' + r.signatureDescription) : '';
+};
 
-export function parse(argz: IArguments, r: IPragRules, $opts: IPragOpts): Object {
+///////////////////////////////////////////////////////////////////////////////////////////////
 
-  const opts = $opts || {};
-  const $parseToObject = Boolean(opts.parseToObject);
-  const preParsed = Boolean(opts.preParsed);
-
-  const args = Array.from(argz); //should work if args is arguments type or already an array
-
+export const parse = function (argz: IArguments, r: IPragRules, opts: IPragOpts): Object {
+  
+  const preParsed = opts === true || Boolean(opts && opts.preParsed);
+  //the following should work if args is arguments type or already an array
+  const args = Array.from(argz);
+  
   if (preParsed) {
     return args;
   }
-
+  
   const rules: Array<IPragRule> = r.args;
-  const parseToObject = $parseToObject === true || Boolean(r.parseToObject);
-
-  let argNames: Array<string>, ret: IPragObjRet;
-
-  if (parseToObject) {
-    //TODO: note this also won't work in the rare case that pragmatik parse is called in a compound fashion,
-    //TODO because then it will not be an arguments object, but a simple array
-    const callee = argz.callee;
-    assert(typeof callee === 'function', 'To use "pragmatik" with "parseToObject" option set to true,' +
-      ' please pass the arguments object to pragmatik.parse(), [this may not work in strict mode].');
-    argNames = fnargs(callee);
-    assert(getUniqueArrayOfStrings(argNames), ' => "Pragmatik" usage error => You have duplicate argument names, ' +
-      'or otherwise you need to name all your arguments so they match your rules, and are same length.');
-    ret = {};
-  }
-
   const argsLengthGreaterThanRulesLength = args.length > rules.length;
-  const argsLengthGreaterThanOrEqualToRulesLength = args.length >= rules.length;
-
+  let argsLengthGreaterThanOrEqualToRulesLength = args.length >= rules.length;
+  
   if (argsLengthGreaterThanRulesLength && r.allowExtraneousTrailingVars === false) {
-    throw new Error('=> Usage error from "pragmatik" library => arguments length is greater than length of rules array,' +
+    throw new Error('Usage error from "pragmatik" library => arguments length is greater than length of rules array,' +
       ' and "allowExtraneousTrailingVars" is explicitly set to false.');
   }
-
+  
   const requiredLength = rules.filter(item => item.required).length;
   if (requiredLength > args.length) {
     throw new Error('"Pragmatic" rules dictate that there are more required args than those passed to function.');
   }
-
+  
   const retArgs: Array<Object> = [];
   // using "a" as let name makes debugging easier because it appears at the top of debugging console
-  let a = 0;
-  let argsOfA: IPragRule;
-
+  let a = 0, argsOfA: IPragRule;
+  
   while (retArgs.length < rules.length || args[a]) {  //args[a] may be undefined
-
+    
+    argsLengthGreaterThanOrEqualToRulesLength = args.length >= rules.length;
     argsOfA = args[a];
-
-    let argType: string = typeof argsOfA;
+    
+    let argType: string = String(typeof argsOfA).trim();
     if (argType === 'object' && Array.isArray(argsOfA)) {
       argType = 'array';
     }
     else if (argType === 'object' && argsOfA === null) {
       argType = 'null';
     }
-
-    let rulesTemp = rules[a];
-
-    if (!rulesTemp) { // in the case that a > rulesTemp.length - 1
+    else if (argType === 'number' && Number.isInteger(argsOfA as any)) {
+      argType = 'integer';
+    }
+    
+    let currentRule = rules[a];
+    
+    if (!currentRule) { // in the case that a > rulesTemp.length - 1
       if (r.allowExtraneousTrailingVars === false) {
-        throw new Error('Extraneous variable passed for index => ' + a + ' => with value ' + args[a] + '\n' +
-          (r.signatureDescription ? ('The function signature is => ' + r.signatureDescription) : ''));
+        throw new Error(`Extraneous variable passed for index => ${a} => with value ${args[a]} ` + getSignatureDesc(r));
       }
       else {
         retArgs.push(argsOfA);
@@ -234,97 +233,82 @@ export function parse(argz: IArguments, r: IPragRules, $opts: IPragOpts): Object
         continue;
       }
     }
-
-    let rulesType: string = rulesTemp.type;
-
+    
+    let rulesType: string = currentRule.type;
+    
     if (rulesType === argType) {
-
+      
       //if the type matches, then let's run the validation checks
-      runChecks(args[a], rulesTemp, retArgs);
-
-      if (parseToObject) {
-        retArgs.push({
-          name: argNames[a],
-          value: argsOfA
-        });
-      }
-      else {
-        retArgs.push(argsOfA);
-      }
-
+      runChecks(args[a], currentRule, retArgs);
+      retArgs.push(argsOfA);
+      
     }
     else if (a > retArgs.length) {
-
+      
       if (r.allowExtraneousTrailingVars === false) {
-        throw new Error('Extraneous variable passed for index => ' + a + ' => with value ' + args[a]);
+        throw new Error(`Extraneous variable passed for index => ${a} => with value ${argsOfA}.`);
       }
-
-      if (parseToObject) {
-        retArgs.push({
-          name: argNames[a],
-          value: argsOfA
-        });
-      }
-      else {
-        retArgs.push(argsOfA);
-      }
-
+      
+      retArgs.push(argsOfA);
+      
     }
-    else if (!rulesTemp.required) {
-
+    else if (!currentRule.required) {
+      
       // have to compare against rules.length - 1, not rules.length because we haven't pushed to the array yet
-      if (r.allowExtraneousTrailingVars === false && (retArgs.length > (rules.length - 1)) && args[a]) {
-        throw new Error('Extraneous variable passed for => "' + argNames[a] + '" => ' + util.inspect(args[a]));
+      if (r.allowExtraneousTrailingVars === false && (retArgs.length > (rules.length - 1)) && argsOfA) {
+        throw new Error('Extraneous variable passed => ' + util.inspect(argsOfA));
       }
-
+      
       if (argsLengthGreaterThanOrEqualToRulesLength) {
-
-        if (argsOfA !== undefined) {
-          let errMsg = rulesTemp.errorMessage;
+        
+        if (argsOfA !== undefined && argsOfA !== null) {
+          let errMsg = currentRule.errorMessage;
           let msg = typeof errMsg === 'function' ? errMsg(r) : (errMsg || '');
-
-          throw new Error(msg + '\nArgument is *not* required at argument index = ' + a +
-            ', but type was wrong \n => expected => "'
-            + rulesType + '"\n => actual => "' + argType + '"');
+          
+          log.error('Argument is *not* required at argument index = ' + a +
+            ', but type was wrong => expected => "'
+            + rulesType + '" => actual => "' + argType + '"');
+          
+          throw new Error(msg);
         }
       }
       else {
-        args.splice(a, 0, undefined);
+        
+        if(argsOfA !== null){
+          args.splice(a, 0, undefined);
+        }
+        
       }
-
-      let fn = rulesTemp.default;
-
-      let deflt: Object = undefined;  //this assignment is necessary to reassign for each loop
-      if (fn && typeof fn !== 'function') {
-        throw new Error(' => Pragmatik usage error => "default" property should be undefined or a function.');
-      }
-      else if (fn) {
+      
+      let fn = currentRule.default;
+      
+      let deflt: Object = argsOfA === null ? null : undefined;  //this assignment is necessary to reassign for each loop
+      
+      if (typeof fn === 'function') {
         deflt = fn();
       }
-
-      if (parseToObject) {
-        retArgs.push({
-          name: argNames[a],
-          value: deflt
-        });
+      else if (fn) {
+        throw new Error('Pragmatik usage error => "default" property should be undefined or a function.');
       }
-      else {
-        retArgs.push(deflt);
-      }
+      
+      retArgs.push(deflt);
+      
     }
     else {
-
-      let errMsg = rulesTemp.errorMessage;
+      
+      let errMsg = currentRule.errorMessage;
       let msg = typeof errMsg === 'function' ? errMsg(r) : (errMsg || '');
-
-      throw new Error(msg + '\nArgument is required at argument index = ' + a + ', ' +
+      
+      log.error(' => Bar => Argument is required at argument index = ' + a + ', ' +
         'but type was wrong \n => expected => "'
         + rulesType + '"\n => actual => "' + argType + '"');
+      
+      throw new Error(msg);
     }
-
+    
     a++;
   }
-
+  
   rules.forEach(function (r, index) {
     if (r.postChecks) {
       r.postChecks.forEach(function (fn: Function) {
@@ -332,14 +316,7 @@ export function parse(argz: IArguments, r: IPragRules, $opts: IPragOpts): Object
       })
     }
   });
-
-  if (parseToObject) {
-    retArgs.forEach(function (item: IPragRetArg): void {
-      ret[item.name] = item.value;
-    });
-    return ret;
-  }
-
+  
   return retArgs;
-
-}
+  
+};

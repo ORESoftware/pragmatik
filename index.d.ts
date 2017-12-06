@@ -25,5 +25,5 @@ export interface IPragOpts {
 export interface IPragObjRet {
     [key: string]: any;
 }
-export declare function signature(r: IPragRules): IPragRules;
-export declare function parse(argz: IArguments, r: IPragRules, $opts: IPragOpts): Object;
+export declare const signature: (r: IPragRules) => IPragRules;
+export declare const parse: (argz: IArguments, r: IPragRules, opts: IPragOpts) => Object;

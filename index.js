@@ -2,25 +2,36 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var assert = require("assert");
 var util = require("util");
-var fnargs = require('function-arguments');
-var types = [
-    'object',
-    'array',
-    'integer',
-    'number',
-    'string',
-    'boolean',
-    'null',
-    'undefined',
-    'function'
-];
-function signature(r) {
+var lp = require('log-prepend').lp;
+var log = {
+    info: lp(' [pragmatik] ', process.stdout),
+    error: lp(' [pragmatik error] ', process.stderr)
+};
+var types = {
+    'object': true,
+    'array': true,
+    'integer': true,
+    'number': true,
+    'string': true,
+    'boolean': true,
+    'function': true
+};
+var bannedTypes = {
+    'undefined': true,
+    'null': true
+};
+exports.signature = function (r) {
     assert(Array.isArray(r.args), ' => "Pragmatik" usage error => Please define an "args" array property in your definition object.');
     var errors = [];
     var args = r.args;
     args.forEach(function (item, index, arr) {
-        assert(types.indexOf(item.type) >= 0, 'Your item type is wrong or undefined, for rule => \n\n' + util.inspect(item)
-            + '\n\nin the following definition => \n' + util.inspect(r) + '\n\n');
+        if (bannedTypes[String(item.type).trim()]) {
+            throw new Error('The following types cannot be used as a pragmatik type: ' + util.inspect(Object.keys(bannedTypes)));
+        }
+        if (!types[String(item.type).trim()]) {
+            throw new Error('Your item type is wrong or undefined, for rule => \n\n' + util.inspect(item)
+                + '\n\nin the following definition => \n' + util.inspect(r));
+        }
         if (index > 0) {
             var prior = arr[index - 1];
             var priorRequired = prior.required;
@@ -72,14 +83,8 @@ function signature(r) {
         throw new Error(errors.join('\n\n'));
     }
     return r;
-}
-exports.signature = signature;
-function getUniqueArrayOfStrings(a) {
-    return a.filter(function (item, i, ar) {
-        return ar.indexOf(item) === i;
-    }).length === a.length;
-}
-function runChecks(arg, rule, retArgs) {
+};
+var runChecks = function (arg, rule, retArgs) {
     var errors = [];
     if (Array.isArray(rule.checks)) {
         rule.checks.forEach(function (fn) {
@@ -92,36 +97,26 @@ function runChecks(arg, rule, retArgs) {
         });
     }
     else if (rule.checks) {
-        throw new Error(' => Pragmatic usage error => "checks" property should be an array => ' + util.inspect(rule));
+        throw new Error('Pragmatic usage error => "checks" property should be an array => ' + util.inspect(rule));
     }
     if (errors.length) {
-        throw new Error(errors.join('\n\n\n'));
+        throw new Error(errors.join('\n\n'));
     }
-}
-function parse(argz, r, $opts) {
-    var opts = $opts || {};
-    var $parseToObject = Boolean(opts.parseToObject);
-    var preParsed = Boolean(opts.preParsed);
+};
+var getSignatureDesc = function (r) {
+    return r.signatureDescription ? (' => The function signature is => ' + r.signatureDescription) : '';
+};
+exports.parse = function (argz, r, opts) {
+    var preParsed = opts === true || Boolean(opts && opts.preParsed);
     var args = Array.from(argz);
     if (preParsed) {
         return args;
     }
     var rules = r.args;
-    var parseToObject = $parseToObject === true || Boolean(r.parseToObject);
-    var argNames, ret;
-    if (parseToObject) {
-        var callee = argz.callee;
-        assert(typeof callee === 'function', 'To use "pragmatik" with "parseToObject" option set to true,' +
-            ' please pass the arguments object to pragmatik.parse(), [this may not work in strict mode].');
-        argNames = fnargs(callee);
-        assert(getUniqueArrayOfStrings(argNames), ' => "Pragmatik" usage error => You have duplicate argument names, ' +
-            'or otherwise you need to name all your arguments so they match your rules, and are same length.');
-        ret = {};
-    }
     var argsLengthGreaterThanRulesLength = args.length > rules.length;
     var argsLengthGreaterThanOrEqualToRulesLength = args.length >= rules.length;
     if (argsLengthGreaterThanRulesLength && r.allowExtraneousTrailingVars === false) {
-        throw new Error('=> Usage error from "pragmatik" library => arguments length is greater than length of rules array,' +
+        throw new Error('Usage error from "pragmatik" library => arguments length is greater than length of rules array,' +
             ' and "allowExtraneousTrailingVars" is explicitly set to false.');
     }
     var requiredLength = rules.filter(function (item) { return item.required; }).length;
@@ -129,22 +124,24 @@ function parse(argz, r, $opts) {
         throw new Error('"Pragmatic" rules dictate that there are more required args than those passed to function.');
     }
     var retArgs = [];
-    var a = 0;
-    var argsOfA;
+    var a = 0, argsOfA;
     while (retArgs.length < rules.length || args[a]) {
+        argsLengthGreaterThanOrEqualToRulesLength = args.length >= rules.length;
         argsOfA = args[a];
-        var argType = typeof argsOfA;
+        var argType = String(typeof argsOfA).trim();
         if (argType === 'object' && Array.isArray(argsOfA)) {
             argType = 'array';
         }
         else if (argType === 'object' && argsOfA === null) {
             argType = 'null';
         }
-        var rulesTemp = rules[a];
-        if (!rulesTemp) {
+        else if (argType === 'number' && Number.isInteger(argsOfA)) {
+            argType = 'integer';
+        }
+        var currentRule = rules[a];
+        if (!currentRule) {
             if (r.allowExtraneousTrailingVars === false) {
-                throw new Error('Extraneous variable passed for index => ' + a + ' => with value ' + args[a] + '\n' +
-                    (r.signatureDescription ? ('The function signature is => ' + r.signatureDescription) : ''));
+                throw new Error("Extraneous variable passed for index => " + a + " => with value " + args[a] + " " + getSignatureDesc(r));
             }
             else {
                 retArgs.push(argsOfA);
@@ -152,73 +149,53 @@ function parse(argz, r, $opts) {
                 continue;
             }
         }
-        var rulesType = rulesTemp.type;
+        var rulesType = currentRule.type;
         if (rulesType === argType) {
-            runChecks(args[a], rulesTemp, retArgs);
-            if (parseToObject) {
-                retArgs.push({
-                    name: argNames[a],
-                    value: argsOfA
-                });
-            }
-            else {
-                retArgs.push(argsOfA);
-            }
+            runChecks(args[a], currentRule, retArgs);
+            retArgs.push(argsOfA);
         }
         else if (a > retArgs.length) {
             if (r.allowExtraneousTrailingVars === false) {
-                throw new Error('Extraneous variable passed for index => ' + a + ' => with value ' + args[a]);
+                throw new Error("Extraneous variable passed for index => " + a + " => with value " + argsOfA + ".");
             }
-            if (parseToObject) {
-                retArgs.push({
-                    name: argNames[a],
-                    value: argsOfA
-                });
-            }
-            else {
-                retArgs.push(argsOfA);
-            }
+            retArgs.push(argsOfA);
         }
-        else if (!rulesTemp.required) {
-            if (r.allowExtraneousTrailingVars === false && (retArgs.length > (rules.length - 1)) && args[a]) {
-                throw new Error('Extraneous variable passed for => "' + argNames[a] + '" => ' + util.inspect(args[a]));
+        else if (!currentRule.required) {
+            if (r.allowExtraneousTrailingVars === false && (retArgs.length > (rules.length - 1)) && argsOfA) {
+                throw new Error('Extraneous variable passed => ' + util.inspect(argsOfA));
             }
             if (argsLengthGreaterThanOrEqualToRulesLength) {
-                if (argsOfA !== undefined) {
-                    var errMsg = rulesTemp.errorMessage;
+                if (argsOfA !== undefined && argsOfA !== null) {
+                    var errMsg = currentRule.errorMessage;
                     var msg = typeof errMsg === 'function' ? errMsg(r) : (errMsg || '');
-                    throw new Error(msg + '\nArgument is *not* required at argument index = ' + a +
-                        ', but type was wrong \n => expected => "'
-                        + rulesType + '"\n => actual => "' + argType + '"');
+                    log.error('Argument is *not* required at argument index = ' + a +
+                        ', but type was wrong => expected => "'
+                        + rulesType + '" => actual => "' + argType + '"');
+                    throw new Error(msg);
                 }
             }
             else {
-                args.splice(a, 0, undefined);
+                if (argsOfA !== null) {
+                    args.splice(a, 0, undefined);
+                }
             }
-            var fn = rulesTemp.default;
-            var deflt = undefined;
-            if (fn && typeof fn !== 'function') {
-                throw new Error(' => Pragmatik usage error => "default" property should be undefined or a function.');
-            }
-            else if (fn) {
+            var fn = currentRule.default;
+            var deflt = argsOfA === null ? null : undefined;
+            if (typeof fn === 'function') {
                 deflt = fn();
             }
-            if (parseToObject) {
-                retArgs.push({
-                    name: argNames[a],
-                    value: deflt
-                });
+            else if (fn) {
+                throw new Error('Pragmatik usage error => "default" property should be undefined or a function.');
             }
-            else {
-                retArgs.push(deflt);
-            }
+            retArgs.push(deflt);
         }
         else {
-            var errMsg = rulesTemp.errorMessage;
+            var errMsg = currentRule.errorMessage;
             var msg = typeof errMsg === 'function' ? errMsg(r) : (errMsg || '');
-            throw new Error(msg + '\nArgument is required at argument index = ' + a + ', ' +
+            log.error(' => Bar => Argument is required at argument index = ' + a + ', ' +
                 'but type was wrong \n => expected => "'
                 + rulesType + '"\n => actual => "' + argType + '"');
+            throw new Error(msg);
         }
         a++;
     }
@@ -229,12 +206,5 @@ function parse(argz, r, $opts) {
             });
         }
     });
-    if (parseToObject) {
-        retArgs.forEach(function (item) {
-            ret[item.name] = item.value;
-        });
-        return ret;
-    }
     return retArgs;
-}
-exports.parse = parse;
+};
