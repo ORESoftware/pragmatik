@@ -15,13 +15,9 @@ module.exports = {
   matchNone: [/fixture/, /.*target/],        //recommended regex for "matchNone" => [/fixture/],
   matchAll: [/\.test\.js$/],                 //recommended regex for "matchAll" => [],
 
-  // Object: child process logging
-  childProcessLogs: [0,1,2],
-
   //string
   testDir: 'test',
-  testSrcDir: 'test/src',                   // recommended that you create a test/src directory
-  testTargetDir: 'test/target',         // only used if compiling/transpiling tests
+  testSrcDir: 'test/@src',                   // recommended that you create a test/src directory
   sumanHelpersDir: 'test/.suman',
   uniqueAppName: 'pragmatik',
   browser: 'Firefox',                 // browser to open test results with
