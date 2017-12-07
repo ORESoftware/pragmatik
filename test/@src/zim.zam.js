@@ -31,32 +31,35 @@ Test.create('basic tests', function (pragmatik, assert, it) {
     ]
   });
 
-  function foo () {
+  function foo() {
     return pragmatik.parse(arguments, r);
   }
 
   it('zims and zams (1)', t => {
 
-    const [a,b,c,d,e] = foo(true, { zim: 'zam' }, function () {});
+    const [a, b, c, d, e] = foo(true, {zim: 'zam'}, function () {
+    });
     assert.equal(a, undefined, 'a is not undefined.');
     assert.equal(b, true, 'b is not true, but should be true.');
-    assert.deepEqual(c, { zim: 'zam' }, 'c is not the object it is supposed to be.');
+    assert.deepEqual(c, {zim: 'zam'}, 'c is not the object it is supposed to be.');
     assert.deepEqual(d, undefined, 'd is not undefined.');
     assert.deepEqual(typeof e, 'function', 'e should be a function.');
 
   });
 
-  it('zims and zams (2)', { throws: /Argument is required at argument index = 1, but type was wrong/ }, t => {
+  it('zims and zams (2)',
+    {throws: /Argument is required at argument index = 1, but type was wrong/},
+    t => {
+      const [a, b, c, d, e] = foo('dog', {zim: 'zam'}, function () {
+      });
+    });
 
-    const [a,b,c,d,e] = foo('dog', { zim: 'zam' }, function () {});
-
-  });
-
-  it('zims and zams (3)', { throws: /Argument is required at argument index = 2, but type was wrong/ }, t => {
-
-    const [a,b,c,d,e] = foo('dog', false, function () {});
-
-  });
+  it('zims and zams (3)',
+    {throws: /Argument is required at argument index = 2, but type was wrong/},
+    t => {
+      const [a, b, c, d, e] = foo('dog', false, function () {
+      });
+    });
 
 });
 

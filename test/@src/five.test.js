@@ -1,10 +1,12 @@
 'use strict';
 const suman = require('suman');
-const Test = suman.init(module, {});
+const Test = suman.init(module, {}, {
+  allowSkip: true
+});
 
 ////////////////////////////////////////////////////////////////
 
-Test.create('basic tests', function (pragmatik, assert, it, describe) {
+Test.create(function (pragmatik, assert, it, describe) {
 
   const r = pragmatik.signature({
 
@@ -57,10 +59,8 @@ Test.create('basic tests', function (pragmatik, assert, it, describe) {
     //
     // });
 
-
     it('args => [null, Function]  (should pass)', t => {
 
-      debugger;
       const [a, b, c, d] = foo(null, function z() {
       });
 
@@ -72,7 +72,6 @@ Test.create('basic tests', function (pragmatik, assert, it, describe) {
 
     it('args => [null, Function] (should pass)', t => {
 
-      debugger;
       const [a, b, c, d] = foo(function z() {
       });
 
@@ -84,7 +83,6 @@ Test.create('basic tests', function (pragmatik, assert, it, describe) {
 
     it('args => [null, Function] (should pass)', t => {
 
-      debugger;
       const [a, b, c, d] = foo(null, function z() {
       });
 
@@ -94,10 +92,8 @@ Test.create('basic tests', function (pragmatik, assert, it, describe) {
 
     });
 
-
     it('args => [null, Function] (should pass)', t => {
 
-      debugger;
       const [a, b, c, d] = foo(undefined, function z() {
       });
 
@@ -131,7 +127,6 @@ Test.create('basic tests', function (pragmatik, assert, it, describe) {
 
     it('basic #1', t => {
 
-      debugger;
       const [a, b, c, d] = foo({}, function z() {
       });
 

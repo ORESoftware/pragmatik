@@ -1,0 +1,5 @@
+{
+  "@run": {
+    "plugin": "suman-run-plugins/plugins/typescript-std"
+  }
+}

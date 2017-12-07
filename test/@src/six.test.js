@@ -1,13 +1,17 @@
+'use strict';
 const suman = require('suman');
 const Test = suman.init(module);
 
-Test.describe('basic tests', {}, function (pragmatik, assert, util, it) {
+//////////////////////////////////////////////////////
+
+Test.create(function (pragmatik, assert, util, it) {
 
   const r = pragmatik.signature({
 
     mode: 'strict', // does not allow two adjacent non-required types to be the same
     allowExtraneousTrailingVars: false,
     args: [
+
       {
         type: 'string',
         required: false,
@@ -34,25 +38,26 @@ Test.describe('basic tests', {}, function (pragmatik, assert, util, it) {
     ]
   });
 
-  function foo () {
+  function foo() {
     return pragmatik.parse(arguments, r);
   }
 
-  function compoundFoo () {
+  function compoundFoo() {
     return pragmatik.parse(foo.apply(null, arguments), r);
   }
 
-  function tripleFoo () {
+  function tripleFoo() {
     return pragmatik.parse(compoundFoo.apply(null, arguments), r);
   }
 
-  function quadrupleFoo () {
+  function quadrupleFoo() {
     return pragmatik.parse(tripleFoo.apply(null, arguments), r);
   }
 
   it('basic #1', t => {
 
-    const args = [ undefined, { m: 'hi' }, function () {} ];
+    const args = [undefined, {m: 'hi'}, function () {
+    }];
 
     const vals = [
       foo.apply(null, args),
@@ -62,19 +67,18 @@ Test.describe('basic tests', {}, function (pragmatik, assert, util, it) {
     ];
 
     vals.forEach(function (v) {
-      const [a,b,c,d] = v;
+      const [a, b, c, d] = v;
       assert(a === undefined, 'a should be undefined');
       assert.equal(typeof b, 'object', 'b should be an object');
       assert.equal(typeof c, 'function', 'c should be a function');
       assert(d === undefined, 'd should be undefined');
-
     });
 
   });
 
   it('basic #12', t => {
 
-    const [a,b,c,d] = foo('',{ m: 'dog' }, function () {
+    const [a, b, c, d] = foo('', {m: 'dog'}, function () {
 
     });
 
@@ -82,7 +86,7 @@ Test.describe('basic tests', {}, function (pragmatik, assert, util, it) {
 
   it('basic #13', t => {
 
-    const [a,b,c,d] = foo({ m: 'dog' }, function () {
+    const [a, b, c, d] = foo({m: 'dog'}, function () {
 
     });
 
