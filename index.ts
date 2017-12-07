@@ -14,7 +14,7 @@ const log = {
 };
 
 //project
-const types = <any> {
+const okTypes = <any> {
   'object': true,
   'array': true,
   'integer': true,
@@ -28,7 +28,6 @@ const bannedTypes = <any>{
   'undefined': true,
   'null': true
 };
-
 
 export interface IPragRetArg {
   name: 'string',
@@ -47,14 +46,12 @@ export interface IPragRule {
 export interface IPragRules {
   mode?: string,
   signatureDescription?: string,
-  parseToObject?: boolean,
   allowExtraneousTrailingVars?: boolean,
   extraneousVarsErrorMessage?: string,
   args: Array<IPragRule>
 }
 
 export interface IPragOpts {
-  parseToObject?: boolean,
   preParsed?: boolean
 }
 
@@ -70,15 +67,14 @@ export const signature = function (r: IPragRules) {
   
   args.forEach(function (item, index, arr) {
     
-    if(bannedTypes[String(item.type).trim()]){
+    if (bannedTypes[String(item.type).trim()]) {
       throw new Error('The following types cannot be used as a pragmatik type: ' + util.inspect(Object.keys(bannedTypes)));
     }
     
-    if(!types[String(item.type).trim()]){
+    if (!okTypes[String(item.type).trim()]) {
       throw new Error('Your item type is wrong or undefined, for rule => \n\n' + util.inspect(item)
-      + '\n\nin the following definition => \n' + util.inspect(r))
+        + '\n\nin the following definition => \n' + util.inspect(r))
     }
-    
     
     //check to see if two adjacent items of the same type are both required
     if (index > 0) {
@@ -175,6 +171,16 @@ const getSignatureDesc = function (r: IPragRules) {
   return r.signatureDescription ? (' => The function signature is => ' + r.signatureDescription) : '';
 };
 
+const getErrorMessage = function(a: number, argType: string, rulesType: string, msg: string) : Array<string>{
+  return [
+    'Missing required argument',
+    `Argument is required at argument index = ${a}, but type was wrong`,
+    'actual => "' + argType + '"',
+    'expected => "' + rulesType + '"',
+    '.'
+  ];
+};
+
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
 export const parse = function (argz: IArguments, r: IPragRules, opts: IPragOpts): Object {
@@ -198,7 +204,9 @@ export const parse = function (argz: IArguments, r: IPragRules, opts: IPragOpts)
   
   const requiredLength = rules.filter(item => item.required).length;
   if (requiredLength > args.length) {
-    throw new Error('"Pragmatic" rules dictate that there are more required args than those passed to function.');
+    throw new Error('"Pragmatic" rules dictate that there are more required args than those passed to function. ' +
+      'Expected minimum number of arguments: ' + requiredLength + '. Actual number of arguments: ' + args.length + '. ' +
+      (r.signatureDescription ? 'The function signature is: ' + r.signatureDescription : ''));
   }
   
   const retArgs: Array<Object> = [];
@@ -252,7 +260,15 @@ export const parse = function (argz: IArguments, r: IPragRules, opts: IPragOpts)
       retArgs.push(argsOfA);
       
     }
-    else if (!currentRule.required) {
+    else if (currentRule.required) {
+      
+      // the argument is required, but it's the wrong type
+      let errMsg = currentRule.errorMessage;
+      let msg = typeof errMsg === 'function' ? errMsg(r) : (errMsg || '');
+      throw new Error(getErrorMessage(a, argType, rulesType, msg).join('. '));
+      
+    }
+    else {
       
       // have to compare against rules.length - 1, not rules.length because we haven't pushed to the array yet
       if (r.allowExtraneousTrailingVars === false && (retArgs.length > (rules.length - 1)) && argsOfA) {
@@ -274,7 +290,7 @@ export const parse = function (argz: IArguments, r: IPragRules, opts: IPragOpts)
       }
       else {
         
-        if(argsOfA !== null){
+        if (argsOfA !== null) {
           args.splice(a, 0, undefined);
         }
         
@@ -293,17 +309,6 @@ export const parse = function (argz: IArguments, r: IPragRules, opts: IPragOpts)
       
       retArgs.push(deflt);
       
-    }
-    else {
-      
-      let errMsg = currentRule.errorMessage;
-      let msg = typeof errMsg === 'function' ? errMsg(r) : (errMsg || '');
-      
-      log.error(' => Bar => Argument is required at argument index = ' + a + ', ' +
-        'but type was wrong \n => expected => "'
-        + rulesType + '"\n => actual => "' + argType + '"');
-      
-      throw new Error(msg);
     }
     
     a++;

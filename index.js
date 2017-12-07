@@ -7,7 +7,7 @@ var log = {
     info: lp(' [pragmatik] ', process.stdout),
     error: lp(' [pragmatik error] ', process.stderr)
 };
-var types = {
+var okTypes = {
     'object': true,
     'array': true,
     'integer': true,
@@ -28,7 +28,7 @@ exports.signature = function (r) {
         if (bannedTypes[String(item.type).trim()]) {
             throw new Error('The following types cannot be used as a pragmatik type: ' + util.inspect(Object.keys(bannedTypes)));
         }
-        if (!types[String(item.type).trim()]) {
+        if (!okTypes[String(item.type).trim()]) {
             throw new Error('Your item type is wrong or undefined, for rule => \n\n' + util.inspect(item)
                 + '\n\nin the following definition => \n' + util.inspect(r));
         }
@@ -106,6 +106,15 @@ var runChecks = function (arg, rule, retArgs) {
 var getSignatureDesc = function (r) {
     return r.signatureDescription ? (' => The function signature is => ' + r.signatureDescription) : '';
 };
+var getErrorMessage = function (a, argType, rulesType, msg) {
+    return [
+        'Missing required argument',
+        "Argument is required at argument index = " + a + ", but type was wrong",
+        'actual => "' + argType + '"',
+        'expected => "' + rulesType + '"',
+        '.'
+    ];
+};
 exports.parse = function (argz, r, opts) {
     var preParsed = opts === true || Boolean(opts && opts.preParsed);
     var args = Array.from(argz);
@@ -121,7 +130,9 @@ exports.parse = function (argz, r, opts) {
     }
     var requiredLength = rules.filter(function (item) { return item.required; }).length;
     if (requiredLength > args.length) {
-        throw new Error('"Pragmatic" rules dictate that there are more required args than those passed to function.');
+        throw new Error('"Pragmatic" rules dictate that there are more required args than those passed to function. ' +
+            'Expected minimum number of arguments: ' + requiredLength + '. Actual number of arguments: ' + args.length + '. ' +
+            (r.signatureDescription ? 'The function signature is: ' + r.signatureDescription : ''));
     }
     var retArgs = [];
     var a = 0, argsOfA;
@@ -160,7 +171,12 @@ exports.parse = function (argz, r, opts) {
             }
             retArgs.push(argsOfA);
         }
-        else if (!currentRule.required) {
+        else if (currentRule.required) {
+            var errMsg = currentRule.errorMessage;
+            var msg = typeof errMsg === 'function' ? errMsg(r) : (errMsg || '');
+            throw new Error(getErrorMessage(a, argType, rulesType, msg).join('. '));
+        }
+        else {
             if (r.allowExtraneousTrailingVars === false && (retArgs.length > (rules.length - 1)) && argsOfA) {
                 throw new Error('Extraneous variable passed => ' + util.inspect(argsOfA));
             }
@@ -188,14 +204,6 @@ exports.parse = function (argz, r, opts) {
                 throw new Error('Pragmatik usage error => "default" property should be undefined or a function.');
             }
             retArgs.push(deflt);
-        }
-        else {
-            var errMsg = currentRule.errorMessage;
-            var msg = typeof errMsg === 'function' ? errMsg(r) : (errMsg || '');
-            log.error(' => Bar => Argument is required at argument index = ' + a + ', ' +
-                'but type was wrong \n => expected => "'
-                + rulesType + '"\n => actual => "' + argType + '"');
-            throw new Error(msg);
         }
         a++;
     }

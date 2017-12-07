@@ -1,18 +1,14 @@
+'use strict';
 const suman = require('suman');
-const Test = suman.init(module, {
-  allowSkip: true
-}, {
-   allowSkip: true
-}, {
-  allowSkip: true
-});
+const Test = suman.init(module, {});
+
+////////////////////////////////////////////////////////////////
 
 Test.create('basic tests', function (pragmatik, assert, it, describe) {
 
   const r = pragmatik.signature({
 
     mode: 'strict', // does not allow two adjacent non-required types to be the same
-    parseToObject: false,
     allowExtraneousTrailingVars: false,
     extraneousVarsErrorMessage: 'Too many args.',
     args: [

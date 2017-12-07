@@ -13,13 +13,11 @@ export interface IPragRule {
 export interface IPragRules {
     mode?: string;
     signatureDescription?: string;
-    parseToObject?: boolean;
     allowExtraneousTrailingVars?: boolean;
     extraneousVarsErrorMessage?: string;
     args: Array<IPragRule>;
 }
 export interface IPragOpts {
-    parseToObject?: boolean;
     preParsed?: boolean;
 }
 export interface IPragObjRet {
