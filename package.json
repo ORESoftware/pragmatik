@@ -1,6 +1,6 @@
 {
   "name": "pragmatik",
-  "version": "0.0.409",
+  "version": "0.0.410",
   "description": "Parse arguments correctly for variadic functions",
   "main": "index.js",
   "scripts": {
