@@ -11,9 +11,9 @@ const numOfCPUs = os.cpus().length || 1;
 module.exports = {
 
   // Array<regex>
-  matchAny: [],                              //recommended regex for "matchAny" => [/\.test\.js$/],
-  matchNone: [/fixture/, /.*target/],        //recommended regex for "matchNone" => [/fixture/],
-  matchAll: [/\.test\.js$/],                 //recommended regex for "matchAll" => [],
+  matchAny: [/\.ts$/],                              //recommended regex for "matchAny" => [/\.test\.js$/],
+  matchNone: [/\/fixtures?\//, /\/.*target\//],        //recommended regex for "matchNone" => [/fixture/],
+  matchAll: [/\.test\.ts$/],                 //recommended regex for "matchAll" => [],
 
   //string
   testDir: 'test',

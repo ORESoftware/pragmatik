@@ -36,21 +36,14 @@ Test.create(function (pragmatik, assert, it, describe) {
         return pragmatik.parse(arguments, r);
     }
     describe('wrapper', function (b) {
-        // describe.skip('throw errors', b => {
-        //
-        //   it('args => [string,object] =>  (should throw because function is required)',
-        //     {throws: /Argument is required at argument index.*but type was wrong/},
-        //     t => {
-        //       const [a, b, c, d] = foo('oh yes', {a: 'b'});
-        //     });
-        //
-        //   it('[object] (should throw because function is required)',
-        //     {throws: /Argument is required at argument index.*but type was wrong/},
-        //     t => {
-        //       const [a, b, c, d] = foo({a: 'b'});
-        //     });
-        //
-        // });
+        describe('throw errors', function (b) {
+            it('args => [string,object] =>  (should throw because function is required)', { throws: /Argument is required at argument index.*but type was wrong/ }, function (t) {
+                var _a = foo('oh yes', { a: 'b' }), a = _a[0], b = _a[1], c = _a[2], d = _a[3];
+            });
+            it('[object] (should throw because function is required)', { throws: /Argument is required at argument index.*but type was wrong/ }, function (t) {
+                var _a = foo({ a: 'b' }), a = _a[0], b = _a[1], c = _a[2], d = _a[3];
+            });
+        });
         it('args => [null, Function]  (should pass)', function (t) {
             var _a = foo(null, function z() {
             }), a = _a[0], b = _a[1], c = _a[2], d = _a[3];
@@ -100,71 +93,50 @@ Test.create(function (pragmatik, assert, it, describe) {
             t.assert.deepEqual(b, {});
             t.assert.equal(c.name, 'z');
         });
-        // describe.skip('should pass without errors', b => {
-        //
-        //   it('basic #1', t => {
-        //
-        //     const [a, b, c, d] = foo('cheese', function xyz() {
-        //     });
-        //
-        //     t.assert.equal(a, 'cheese');
-        //     t.assert.equal(b, undefined);
-        //     t.assert.equal(c.name, 'xyz');
-        //     t.assert.equal(d, undefined);
-        //
-        //   });
-        //
-        //   it('basic #2', t => {
-        //
-        //     const [a, b, c, d] = foo('bar', function noop() {
-        //     });
-        //
-        //     t.assert.equal(a, 'bar');
-        //     t.assert.equal(b, undefined);
-        //     t.assert.equal(typeof c, 'function');
-        //     t.assert.equal(d, undefined);
-        //
-        //   });
-        //
-        //   it('basic #2', {throws: /.*/}, t => {
-        //
-        //     //TODO: this should prob fail if allowExtraneousTrailingVars === false
-        //
-        //     const [a, b, c, d, e, f] = foo(function zzz() {
-        //
-        //     }, function ppp() {
-        //
-        //     });
-        //
-        //     t.assert.equal(a, undefined);
-        //     t.assert.equal(b, undefined);
-        //     t.assert.equal(c.name, 'noop');
-        //     t.assert.equal(d.name, 'zzz');
-        //     t.assert.equal(e.name, 'ppp');
-        //
-        //   });
-        //
-        //   it('basic #2', {}, t => {
-        //
-        //     // throw new Error('test error message 3');
-        //
-        //     //TODO: this should prob fail if allowExtraneousTrailingVars === false
-        //
-        //     // const [a, b, c, d, e, f] = foo(false,function noop() {
-        //     // }, function zzz() {
-        //     //
-        //     // }, function ppp() {
-        //     //
-        //     // });
-        //     //
-        //     // assert.equal(a, undefined);
-        //     // assert.equal(b, undefined);
-        //     // assert.equal(c.name, 'noop');
-        //     // assert.equal(d.name, 'zzz');
-        //     // assert.equal(e.name, 'ppp');
-        //
-        //   });
-        //
-        // });
+        describe('should pass without errors', function (b) {
+            it('basic #1', function (t) {
+                var _a = foo('cheese', function xyz() {
+                }), a = _a[0], b = _a[1], c = _a[2], d = _a[3];
+                t.assert.equal(a, 'cheese');
+                t.assert.equal(b, undefined);
+                t.assert.equal(c.name, 'xyz');
+                t.assert.equal(d, undefined);
+            });
+            it('basic #2', function (t) {
+                var _a = foo('bar', function noop() {
+                }), a = _a[0], b = _a[1], c = _a[2], d = _a[3];
+                t.assert.equal(a, 'bar');
+                t.assert.equal(b, undefined);
+                t.assert.equal(typeof c, 'function');
+                t.assert.equal(d, undefined);
+            });
+            it('basic #2', { throws: /.*/ }, function (t) {
+                //TODO: this should prob fail if allowExtraneousTrailingVars === false
+                var _a = foo(function zzz() {
+                }, function ppp() {
+                }), a = _a[0], b = _a[1], c = _a[2], d = _a[3], e = _a[4], f = _a[5];
+                t.assert.equal(a, undefined);
+                t.assert.equal(b, undefined);
+                t.assert.equal(c.name, 'noop');
+                t.assert.equal(d.name, 'zzz');
+                t.assert.equal(e.name, 'ppp');
+            });
+            it('basic #2', {}, function (t) {
+                // throw new Error('test error message 3');
+                //TODO: this should prob fail if allowExtraneousTrailingVars === false
+                // const [a, b, c, d, e, f] = foo(false,function noop() {
+                // }, function zzz() {
+                //
+                // }, function ppp() {
+                //
+                // });
+                //
+                // assert.equal(a, undefined);
+                // assert.equal(b, undefined);
+                // assert.equal(c.name, 'noop');
+                // assert.equal(d.name, 'zzz');
+                // assert.equal(e.name, 'ppp');
+            });
+        });
     });
 });

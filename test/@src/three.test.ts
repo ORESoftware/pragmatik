@@ -39,6 +39,24 @@ Test.create(function (pragmatik, assert, it) {
     assert.equal(c, undefined);
 
   });
+  
+  it('basic #1', [t => {
+    
+    const [a, b, c, d] = foo('oh yes', {a: 'b'});
+    assert.equal(a, 'oh yes');
+    assert.equal(typeof b, 'object');
+    assert.equal(c, undefined);
+    
+  }]);
+  
+  it('basic #1', [t => {
+    
+    const [a, b, c, d] = foo('oh yes', {a: 'b'});
+    assert.equal(a, 'oh yes');
+    assert.equal(typeof b, 'object');
+    assert.equal(c, undefined);
+    
+  }]);
 
   it('basic #2',
     {throws: /rules dictate that there are more required args than those passed/},

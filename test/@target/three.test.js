@@ -31,6 +31,18 @@ Test.create(function (pragmatik, assert, it) {
         assert.equal(typeof b, 'object');
         assert.equal(c, undefined);
     });
+    it('basic #1', [function (t) {
+            var _a = foo('oh yes', { a: 'b' }), a = _a[0], b = _a[1], c = _a[2], d = _a[3];
+            assert.equal(a, 'oh yes');
+            assert.equal(typeof b, 'object');
+            assert.equal(c, undefined);
+        }]);
+    it('basic #1', [function (t) {
+            var _a = foo('oh yes', { a: 'b' }), a = _a[0], b = _a[1], c = _a[2], d = _a[3];
+            assert.equal(a, 'oh yes');
+            assert.equal(typeof b, 'object');
+            assert.equal(c, undefined);
+        }]);
     it('basic #2', { throws: /rules dictate that there are more required args than those passed/ }, function (t) {
         var _a = foo('oh yes'), a = _a[0], b = _a[1], c = _a[2], d = _a[3];
     });

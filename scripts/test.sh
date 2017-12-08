@@ -6,4 +6,6 @@ if [[ -z ${SUMAN} ]]; then
  npm install -g suman
 fi
 
-suman test
+
+# given suman.conf.js, this should be setup correctly
+suman --default
