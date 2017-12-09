@@ -211,21 +211,21 @@ export const parse = function (argz: IArguments, r: IPragRules, opts: IPragOpts)
   
   const retArgs: Array<Object> = [];
   // using "a" as let name makes debugging easier because it appears at the top of debugging console
-  let a = 0, argsOfA: IPragRule;
+  let a = 0, argsOfA: any;
   
   while (retArgs.length < rules.length || args[a]) {  //args[a] may be undefined
     
     argsLengthGreaterThanOrEqualToRulesLength = args.length >= rules.length;
     argsOfA = args[a];
     
-    let argType: string = String(typeof argsOfA).trim();
+    let argType: string = String(typeof argsOfA).trim().toLowerCase();
     if (argType === 'object' && Array.isArray(argsOfA)) {
       argType = 'array';
     }
     else if (argType === 'object' && argsOfA === null) {
       argType = 'null';
     }
-    else if (argType === 'number' && Number.isInteger(argsOfA as any)) {
+    else if (argType === 'number' && Number.isInteger(argsOfA as number)) {
       argType = 'integer';
     }
     
