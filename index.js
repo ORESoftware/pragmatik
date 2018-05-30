@@ -1,13 +1,13 @@
 'use strict';
 Object.defineProperty(exports, "__esModule", { value: true });
-var assert = require("assert");
-var util = require("util");
-var lp = require('log-prepend').lp;
-var log = {
+const assert = require("assert");
+const util = require("util");
+const { lp } = require('log-prepend');
+const log = {
     info: lp(' [pragmatik] ', process.stdout),
     error: lp(' [pragmatik error] ', process.stderr)
 };
-var okTypes = {
+const okTypes = {
     'object': true,
     'array': true,
     'integer': true,
@@ -16,14 +16,14 @@ var okTypes = {
     'boolean': true,
     'function': true
 };
-var bannedTypes = {
+const bannedTypes = {
     'undefined': true,
     'null': true
 };
 exports.signature = function (r) {
     assert(Array.isArray(r.args), ' => "Pragmatik" usage error => Please define an "args" array property in your definition object.');
-    var errors = [];
-    var args = r.args;
+    const errors = [];
+    const args = r.args;
     args.forEach(function (item, index, arr) {
         if (bannedTypes[String(item.type).trim()]) {
             throw new Error('The following types cannot be used as a pragmatik type: ' + util.inspect(Object.keys(bannedTypes)));
@@ -33,8 +33,8 @@ exports.signature = function (r) {
                 + '\n\nin the following definition => \n' + util.inspect(r));
         }
         if (index > 0) {
-            var prior = arr[index - 1];
-            var priorRequired = prior.required;
+            const prior = arr[index - 1];
+            const priorRequired = prior.required;
             if (!priorRequired) {
                 if (prior.type === item.type) {
                     errors.push('Two adjacent fields are of the same type, and the preceding argument' +
@@ -46,11 +46,11 @@ exports.signature = function (r) {
         }
         if (index > 1) {
             if (!item.required) {
-                var matched = false;
-                var matchedIndex = null;
-                var currentIndex = index - 2;
+                let matched = false;
+                let matchedIndex = null;
+                let currentIndex = index - 2;
                 while (currentIndex >= 0) {
-                    var rule = args[currentIndex];
+                    let rule = args[currentIndex];
                     if (rule.type === item.type && !rule.required) {
                         matched = true;
                         matchedIndex = currentIndex;
@@ -60,9 +60,9 @@ exports.signature = function (r) {
                 }
                 if (matched) {
                     currentIndex++;
-                    var ok = false;
+                    let ok = false;
                     while (currentIndex < index) {
-                        var rule = args[currentIndex];
+                        let rule = args[currentIndex];
                         if (rule.required) {
                             ok = true;
                             break;
@@ -84,8 +84,8 @@ exports.signature = function (r) {
     }
     return r;
 };
-var runChecks = function (arg, rule, retArgs) {
-    var errors = [];
+const runChecks = function (arg, rule, retArgs) {
+    let errors = [];
     if (Array.isArray(rule.checks)) {
         rule.checks.forEach(function (fn) {
             try {
@@ -103,43 +103,43 @@ var runChecks = function (arg, rule, retArgs) {
         throw new Error(errors.join('\n\n'));
     }
 };
-var getSignatureDesc = function (r) {
+const getSignatureDesc = function (r) {
     return r.signatureDescription ? (' => The function signature is => ' + r.signatureDescription) : '';
 };
-var getErrorMessage = function (a, argType, rulesType, msg) {
+const getErrorMessage = function (a, argType, rulesType, msg) {
     return [
         'Missing required argument',
-        "Argument is required at argument index = " + a + ", but type was wrong",
+        `Argument is required at argument index = ${a}, but type was wrong`,
         'actual => "' + argType + '"',
         'expected => "' + rulesType + '"',
         '.'
     ];
 };
 exports.parse = function (argz, r, opts) {
-    var preParsed = opts === true || Boolean(opts && opts.preParsed);
-    var args = Array.from(argz);
+    const preParsed = opts === true || Boolean(opts && opts.preParsed);
+    const args = Array.from(argz);
     if (preParsed) {
         return args;
     }
-    var rules = r.args;
-    var argsLengthGreaterThanRulesLength = args.length > rules.length;
-    var argsLengthGreaterThanOrEqualToRulesLength = args.length >= rules.length;
+    const rules = r.args;
+    const argsLengthGreaterThanRulesLength = args.length > rules.length;
+    let argsLengthGreaterThanOrEqualToRulesLength = args.length >= rules.length;
     if (argsLengthGreaterThanRulesLength && r.allowExtraneousTrailingVars === false) {
         throw new Error('Usage error from "pragmatik" library => arguments length is greater than length of rules array,' +
             ' and "allowExtraneousTrailingVars" is explicitly set to false.');
     }
-    var requiredLength = rules.filter(function (item) { return item.required; }).length;
+    const requiredLength = rules.filter(item => item.required).length;
     if (requiredLength > args.length) {
         throw new Error('"Pragmatic" rules dictate that there are more required args than those passed to function. ' +
             'Expected minimum number of arguments: ' + requiredLength + '. Actual number of arguments: ' + args.length + '. ' +
             (r.signatureDescription ? 'The function signature is: ' + r.signatureDescription : ''));
     }
-    var retArgs = [];
-    var a = 0, argsOfA;
+    const retArgs = [];
+    let a = 0, argsOfA;
     while (retArgs.length < rules.length || args[a]) {
         argsLengthGreaterThanOrEqualToRulesLength = args.length >= rules.length;
         argsOfA = args[a];
-        var argType = String(typeof argsOfA).trim();
+        let argType = String(typeof argsOfA).trim().toLowerCase();
         if (argType === 'object' && Array.isArray(argsOfA)) {
             argType = 'array';
         }
@@ -149,10 +149,10 @@ exports.parse = function (argz, r, opts) {
         else if (argType === 'number' && Number.isInteger(argsOfA)) {
             argType = 'integer';
         }
-        var currentRule = rules[a];
+        let currentRule = rules[a];
         if (!currentRule) {
             if (r.allowExtraneousTrailingVars === false) {
-                throw new Error("Extraneous variable passed for index => " + a + " => with value " + args[a] + " " + getSignatureDesc(r));
+                throw new Error(`Extraneous variable passed for index => ${a} => with value ${args[a]} ` + getSignatureDesc(r));
             }
             else {
                 retArgs.push(argsOfA);
@@ -160,20 +160,20 @@ exports.parse = function (argz, r, opts) {
                 continue;
             }
         }
-        var rulesType = currentRule.type;
+        let rulesType = currentRule.type;
         if (rulesType === argType) {
             runChecks(args[a], currentRule, retArgs);
             retArgs.push(argsOfA);
         }
         else if (a > retArgs.length) {
             if (r.allowExtraneousTrailingVars === false) {
-                throw new Error("Extraneous variable passed for index => " + a + " => with value " + argsOfA + ".");
+                throw new Error(`Extraneous variable passed for index => ${a} => with value ${argsOfA}.`);
             }
             retArgs.push(argsOfA);
         }
         else if (currentRule.required) {
-            var errMsg = currentRule.errorMessage;
-            var msg = typeof errMsg === 'function' ? errMsg(r) : (errMsg || '');
+            let errMsg = currentRule.errorMessage;
+            let msg = typeof errMsg === 'function' ? errMsg(r) : (errMsg || '');
             throw new Error(getErrorMessage(a, argType, rulesType, msg).join('. '));
         }
         else {
@@ -182,8 +182,8 @@ exports.parse = function (argz, r, opts) {
             }
             if (argsLengthGreaterThanOrEqualToRulesLength) {
                 if (argsOfA !== undefined && argsOfA !== null) {
-                    var errMsg = currentRule.errorMessage;
-                    var msg = typeof errMsg === 'function' ? errMsg(r) : (errMsg || '');
+                    let errMsg = currentRule.errorMessage;
+                    let msg = typeof errMsg === 'function' ? errMsg(r) : (errMsg || '');
                     log.error('Argument is *not* required at argument index = ' + a +
                         ', but type was wrong => expected => "'
                         + rulesType + '" => actual => "' + argType + '"');
@@ -195,8 +195,8 @@ exports.parse = function (argz, r, opts) {
                     args.splice(a, 0, undefined);
                 }
             }
-            var fn = currentRule.default;
-            var deflt = argsOfA === null ? null : undefined;
+            let fn = currentRule.default;
+            let deflt = argsOfA === null ? null : undefined;
             if (typeof fn === 'function') {
                 deflt = fn();
             }
