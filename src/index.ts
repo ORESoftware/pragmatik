@@ -263,7 +263,7 @@ export const parse = function (argz: IArguments, r: IPragRules, opts: IPragOpts)
     else if (currentRule.required) {
       
       // the argument is required, but it's the wrong type
-      let errMsg = currentRule.errorMessage;
+      let errMsg = currentRule.errorMessage as any;
       let msg = typeof errMsg === 'function' ? errMsg(r) : (errMsg || '');
       throw new Error(getErrorMessage(a, argType, rulesType, msg).join('. '));
       
@@ -278,7 +278,7 @@ export const parse = function (argz: IArguments, r: IPragRules, opts: IPragOpts)
       if (argsLengthGreaterThanOrEqualToRulesLength) {
         
         if (argsOfA !== undefined && argsOfA !== null) {
-          let errMsg = currentRule.errorMessage;
+          let errMsg = currentRule.errorMessage as any;
           let msg = typeof errMsg === 'function' ? errMsg(r) : (errMsg || '');
           
           log.error('Argument is *not* required at argument index = ' + a +
