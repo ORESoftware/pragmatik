@@ -3,16 +3,14 @@
 .idea
 .vscode
 test
-node_modules
 scripts
+src
 
 ### matching
-*.sh
 *.md
 *.txt
 *.log
-*.ts
-*.json
+tsconfig*.json
 *.yml
 *.html
 
@@ -21,7 +19,8 @@ suman.conf.js
 .npmignore
 .gitignore
 yarn.lock
+.editorconfig
+.npmrc
 
-### negation
-!*.d.ts
+
 
