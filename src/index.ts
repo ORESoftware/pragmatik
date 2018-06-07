@@ -59,6 +59,10 @@ export interface IPragObjRet {
   [key: string]: any;
 }
 
+export const r2gSmokeTest = function () {
+  return true;
+};
+
 export const signature = function (r: IPragRules) {
   
   assert(Array.isArray(r.args), ' => "Pragmatik" usage error => Please define an "args" array property in your definition object.');
