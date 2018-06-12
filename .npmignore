@@ -5,6 +5,8 @@
 test
 scripts
 src
+.docker.r2g
+
 
 ### matching
 *.md
