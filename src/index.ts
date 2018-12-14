@@ -187,7 +187,7 @@ const getErrorMessage = function(a: number, argType: string, rulesType: string, 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-export const parse = function (argz: IArguments, r: IPragRules, opts: IPragOpts): Object {
+export const parse = function (argz: IArguments, r: IPragRules, opts: IPragOpts | boolean): typeof retArgs {
   
   const preParsed = opts === true || Boolean(opts && opts.preParsed);
   //the following should work if args is arguments type or already an array
@@ -213,7 +213,7 @@ export const parse = function (argz: IArguments, r: IPragRules, opts: IPragOpts)
       (r.signatureDescription ? 'The function signature is: ' + r.signatureDescription : ''));
   }
   
-  const retArgs: Array<Object> = [];
+  const retArgs: Array<any> = [];
   // using "a" as let name makes debugging easier because it appears at the top of debugging console
   let a = 0, argsOfA: any;
   
